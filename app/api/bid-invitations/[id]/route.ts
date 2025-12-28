@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -12,12 +12,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
 
     // Verify invitation belongs to user's project
     const existing = await prisma.bidInvitation.findFirst({
       where: {
-        id: params.id,
+        id,
         project: { userId: session.user.id },
       },
     })
@@ -27,7 +28,7 @@ export async function PUT(
     }
 
     const invitation = await prisma.bidInvitation.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         projectId: body.projectId,
         subcontractorId: body.subcontractorId,
@@ -61,7 +62,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -69,9 +70,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     const existing = await prisma.bidInvitation.findFirst({
       where: {
-        id: params.id,
+        id,
         project: { userId: session.user.id },
       },
     })
@@ -81,7 +84,7 @@ export async function DELETE(
     }
 
     await prisma.bidInvitation.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ success: true })

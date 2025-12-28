@@ -1,0 +1,295 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for Google OAuth authentication
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relations to construction bid management entities
+  projects      Project[]
+  subcontractors Subcontractor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// NextAuth models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// CSI MasterFormat Division (Top level categories)
+model Division {
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g., "03" for Concrete
+  name        String   // e.g., "Concrete"
+  description String?
+
+  subdivisions          Subdivision[]
+  projectDivisions      ProjectDivision[]
+  subcontractorDivisions SubcontractorDivision[]
+  bidInvitations        BidInvitation[]
+  bids                  Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// CSI MasterFormat Subdivision (Detailed categories)
+model Subdivision {
+  id          String   @id @default(cuid())
+  divisionId  String
+  code        String   @unique // e.g., "03 30 00" for Cast-in-Place Concrete
+  name        String   // e.g., "Cast-in-Place Concrete"
+  description String?
+
+  division         Division          @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  projectDivisions ProjectDivision[]
+  bidInvitations   BidInvitation[]
+  bids             Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Construction Project
+model Project {
+  id                  String    @id @default(cuid())
+  userId              String
+  name                String
+  description         String?   @db.Text
+  location            String?
+  bidDueDate          DateTime
+  rfiDate             DateTime?
+  prebidSiteVisit     Boolean   @default(false)
+  prebidSiteVisitDate DateTime?
+  status              ProjectStatus @default(DRAFT)
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectDivisions ProjectDivision[]
+  bidInvitations   BidInvitation[]
+  bids             Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+  AWARDED
+}
+
+// Many-to-many relation: Project <-> Division/Subdivision
+model ProjectDivision {
+  id            String  @id @default(cuid())
+  projectId     String
+  divisionId    String
+  subdivisionId String?
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  division    Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  subdivision Subdivision? @relation(fields: [subdivisionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, divisionId, subdivisionId])
+  @@index([projectId])
+  @@index([divisionId])
+}
+
+// Subcontractor/Company
+model Subcontractor {
+  id                String  @id @default(cuid())
+  userId            String
+  companyName       String
+  contactPersonName String?
+  email             String?
+  phone             String?
+  officeAddress     String?
+  city              String?
+  state             String?
+  zipCode           String?
+  notes             String? @db.Text
+
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subcontractorDivisions SubcontractorDivision[]
+  bidInvitations         BidInvitation[]
+  bids                   Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([companyName])
+}
+
+// Many-to-many relation: Subcontractor <-> Division
+model SubcontractorDivision {
+  id              String @id @default(cuid())
+  subcontractorId String
+  divisionId      String
+
+  subcontractor Subcontractor @relation(fields: [subcontractorId], references: [id], onDelete: Cascade)
+  division      Division      @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([subcontractorId, divisionId])
+  @@index([subcontractorId])
+  @@index([divisionId])
+}
+
+// Bid Invitation and Tracking
+model BidInvitation {
+  id                     String   @id @default(cuid())
+  projectId              String
+  subcontractorId        String
+  divisionId             String
+  subdivisionId          String?
+
+  // Contact tracking
+  firstContactDate       DateTime?
+  contactMethod          ContactMethod?
+
+  // Response tracking
+  responseReceived       Boolean   @default(false)
+  responseDate           DateTime?
+
+  // Document tracking
+  documentsSent          Boolean   @default(false)
+  documentsSentDate      DateTime?
+  documentsDelivered     Boolean   @default(false)
+  documentsDeliveredDate DateTime?
+  documentsRead          Boolean   @default(false)
+  documentsReadDate      DateTime?
+
+  // Follow-up
+  followUpDate           DateTime?
+
+  // Status
+  status                 BidInvitationStatus @default(INVITED)
+
+  // Notes
+  notes                  String?   @db.Text
+
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subcontractor Subcontractor @relation(fields: [subcontractorId], references: [id], onDelete: Cascade)
+  division      Division      @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  subdivision   Subdivision?  @relation(fields: [subdivisionId], references: [id], onDelete: SetNull)
+  bids          Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, subcontractorId, divisionId, subdivisionId])
+  @@index([projectId])
+  @@index([subcontractorId])
+  @@index([status])
+  @@index([followUpDate])
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  IN_PERSON
+  OTHER
+}
+
+enum BidInvitationStatus {
+  INVITED
+  CONTACTED
+  AWAITING_RESPONSE
+  RESPONDED
+  DECLINED
+  BID_SUBMITTED
+}
+
+// Submitted Bids for Comparison
+model Bid {
+  id              String   @id @default(cuid())
+  bidInvitationId String
+  projectId       String
+  subcontractorId String
+  divisionId      String
+  subdivisionId   String?
+
+  bidAmount       Float
+  bidDate         DateTime @default(now())
+  validUntil      DateTime?
+  notes           String?  @db.Text
+  attachments     Json?    // Store file paths or URLs as JSON
+
+  status          BidStatus @default(SUBMITTED)
+
+  bidInvitation BidInvitation @relation(fields: [bidInvitationId], references: [id], onDelete: Cascade)
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subcontractor Subcontractor @relation(fields: [subcontractorId], references: [id], onDelete: Cascade)
+  division      Division      @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  subdivision   Subdivision?  @relation(fields: [subdivisionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([subcontractorId])
+  @@index([divisionId])
+  @@index([status])
+}
+
+enum BidStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}

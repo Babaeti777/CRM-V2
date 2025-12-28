@@ -87,7 +87,7 @@ export default async function ProjectDetailPage({
             divisions={divisions}
             subdivisions={subdivisions}
             userId={userId}
-            project={project}
+            project={project as any}
           />
         </TabsContent>
 

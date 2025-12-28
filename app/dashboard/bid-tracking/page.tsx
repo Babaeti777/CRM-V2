@@ -17,7 +17,7 @@ import { format, isPast } from 'date-fns'
 export default async function BidTrackingPage({
   searchParams,
 }: {
-  searchParams: { project?: string }
+  searchParams: Promise<{ project?: string }>
 }) {
   const session = await auth()
   const userId = session?.user?.id
@@ -26,12 +26,14 @@ export default async function BidTrackingPage({
     return null
   }
 
+  const params = await searchParams
+
   const whereClause: any = {
     project: { userId },
   }
 
-  if (searchParams.project) {
-    whereClause.projectId = searchParams.project
+  if (params.project) {
+    whereClause.projectId = params.project
   }
 
   const invitations = await prisma.bidInvitation.findMany({

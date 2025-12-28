@@ -10,7 +10,7 @@ import { format } from 'date-fns'
 export default async function BidComparisonPage({
   searchParams,
 }: {
-  searchParams: { project?: string; division?: string }
+  searchParams: Promise<{ project?: string; division?: string }>
 }) {
   const session = await auth()
   const userId = session?.user?.id
@@ -18,6 +18,8 @@ export default async function BidComparisonPage({
   if (!userId) {
     return null
   }
+
+  const params = await searchParams
 
   const projects = await prisma.project.findMany({
     where: { userId },
@@ -32,12 +34,12 @@ export default async function BidComparisonPage({
     project: { userId },
   }
 
-  if (searchParams.project) {
-    whereClause.projectId = searchParams.project
+  if (params.project) {
+    whereClause.projectId = params.project
   }
 
-  if (searchParams.division) {
-    whereClause.divisionId = searchParams.division
+  if (params.division) {
+    whereClause.divisionId = params.division
   }
 
   const bids = await prisma.bid.findMany({
@@ -96,7 +98,7 @@ export default async function BidComparisonPage({
           <div>
             <select
               className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-              defaultValue={searchParams.project || ''}
+              defaultValue={params.project || ''}
               onChange={(e) => {
                 const url = new URL(window.location.href)
                 if (e.target.value) {
@@ -118,7 +120,7 @@ export default async function BidComparisonPage({
           <div>
             <select
               className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-              defaultValue={searchParams.division || ''}
+              defaultValue={params.division || ''}
               onChange={(e) => {
                 const url = new URL(window.location.href)
                 if (e.target.value) {

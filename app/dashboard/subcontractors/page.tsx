@@ -33,6 +33,9 @@ export default async function SubcontractorsPage() {
     orderBy: { companyName: 'asc' },
   })
 
+  type SubcontractorWithDivisions = (typeof subcontractors)[number]
+  type SubcontractorDivision = SubcontractorWithDivisions['subcontractorDivisions'][number]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,7 +74,7 @@ export default async function SubcontractorsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              subcontractors.map((subcontractor) => (
+              subcontractors.map((subcontractor: SubcontractorWithDivisions) => (
                 <TableRow key={subcontractor.id}>
                   <TableCell className="font-medium">
                     {subcontractor.companyName}
@@ -84,7 +87,7 @@ export default async function SubcontractorsPage() {
                       {subcontractor.subcontractorDivisions.length === 0 ? (
                         <span className="text-muted-foreground">None</span>
                       ) : (
-                        subcontractor.subcontractorDivisions.map((sd) => (
+                        subcontractor.subcontractorDivisions.map((sd: SubcontractorDivision) => (
                           <Badge key={sd.id} variant="secondary">
                             {sd.division.code}
                           </Badge>

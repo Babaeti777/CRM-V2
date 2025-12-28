@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { updateSubcontractorSchema } from '@/lib/validations'
+import { ApiResponses } from '@/lib/api-utils'
 
 export async function PUT(
   request: Request,
@@ -9,68 +10,59 @@ export async function PUT(
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const { id } = await params
     const body = await request.json()
-    const {
-      companyName,
-      contactPersonName,
-      email,
-      phone,
-      officeAddress,
-      city,
-      state,
-      zipCode,
-      notes,
-      divisionIds,
-      userId,
-    } = body
 
-    // Verify user matches session
-    if (userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Validate request body
+    const result = updateSubcontractorSchema.safeParse(body)
+    if (!result.success) {
+      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
     }
 
-    // Verify subcontractor belongs to user
+    const data = result.data
+
+    if (data.userId && data.userId !== session.user.id) {
+      return ApiResponses.forbidden()
+    }
+
     const existing = await prisma.subcontractor.findUnique({
-      where: { id, userId },
+      where: { id, userId: session.user.id },
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return ApiResponses.notFound('Subcontractor')
     }
 
-    // Update subcontractor
     const subcontractor = await prisma.subcontractor.update({
       where: { id },
       data: {
-        companyName,
-        contactPersonName: contactPersonName || null,
-        email: email || null,
-        phone: phone || null,
-        officeAddress: officeAddress || null,
-        city: city || null,
-        state: state || null,
-        zipCode: zipCode || null,
-        notes: notes || null,
-        subcontractorDivisions: {
-          deleteMany: {},
-          create: divisionIds.map((divisionId: string) => ({
-            divisionId,
-          })),
-        },
+        ...(data.companyName && { companyName: data.companyName }),
+        contactPersonName: data.contactPersonName ?? existing.contactPersonName,
+        email: data.email ?? existing.email,
+        phone: data.phone ?? existing.phone,
+        officeAddress: data.officeAddress ?? existing.officeAddress,
+        city: data.city ?? existing.city,
+        state: data.state ?? existing.state,
+        zipCode: data.zipCode ?? existing.zipCode,
+        notes: data.notes ?? existing.notes,
+        ...(data.divisionIds && {
+          subcontractorDivisions: {
+            deleteMany: {},
+            create: data.divisionIds.map((divisionId) => ({
+              divisionId,
+            })),
+          },
+        }),
       },
     })
 
-    return NextResponse.json(subcontractor)
+    return ApiResponses.success(subcontractor)
   } catch (error) {
     console.error('Error updating subcontractor:', error)
-    return NextResponse.json(
-      { error: 'Failed to update subcontractor' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to update subcontractor')
   }
 }
 
@@ -81,30 +73,26 @@ export async function DELETE(
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const { id } = await params
 
-    // Verify subcontractor belongs to user
     const existing = await prisma.subcontractor.findUnique({
       where: { id, userId: session.user.id },
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return ApiResponses.notFound('Subcontractor')
     }
 
     await prisma.subcontractor.delete({
       where: { id },
     })
 
-    return NextResponse.json({ success: true })
+    return ApiResponses.success({ success: true })
   } catch (error) {
     console.error('Error deleting subcontractor:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete subcontractor' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to delete subcontractor')
   }
 }

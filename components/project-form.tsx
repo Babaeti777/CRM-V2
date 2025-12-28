@@ -40,11 +40,16 @@ interface Project {
   }>
 }
 
+interface ProjectDivisionWithRelations {
+  division: Division
+  subdivision: Subdivision | null
+}
+
 interface ProjectFormProps {
   divisions: Division[]
   subdivisions: Subdivision[]
   userId: string
-  project?: Project & { projectDivisions: any }
+  project?: Project & { projectDivisions: ProjectDivisionWithRelations[] }
 }
 
 export function ProjectForm({
@@ -58,7 +63,7 @@ export function ProjectForm({
   const [selectedDivisions, setSelectedDivisions] = useState<
     Array<{ divisionId: string; subdivisionId?: string }>
   >(
-    project?.projectDivisions.map((pd: any) => ({
+    project?.projectDivisions.map((pd) => ({
       divisionId: pd.division.id,
       subdivisionId: pd.subdivision?.id,
     })) || []

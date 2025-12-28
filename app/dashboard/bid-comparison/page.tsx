@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { BidComparisonFilters } from '@/components/bid-comparison-filters'
 
 export default async function BidComparisonPage({
   searchParams,
@@ -30,16 +31,11 @@ export default async function BidComparisonPage({
     orderBy: { code: 'asc' },
   })
 
-  const whereClause: any = {
+  // Build where clause
+  const whereClause = {
     project: { userId },
-  }
-
-  if (params.project) {
-    whereClause.projectId = params.project
-  }
-
-  if (params.division) {
-    whereClause.divisionId = params.division
+    ...(params.project && { projectId: params.project }),
+    ...(params.division && { divisionId: params.division }),
   }
 
   const bids = await prisma.bid.findMany({
@@ -54,10 +50,12 @@ export default async function BidComparisonPage({
     orderBy: [{ projectId: 'asc' }, { divisionId: 'asc' }, { bidAmount: 'asc' }],
   })
 
-  // Group bids by project and division
-  const groupedBids: Record<string, Record<string, typeof bids>> = {}
+  type BidWithRelations = (typeof bids)[number]
 
-  bids.forEach((bid) => {
+  // Group bids by project and division
+  const groupedBids: Record<string, Record<string, BidWithRelations[]>> = {}
+
+  for (const bid of bids) {
     const projectKey = bid.project.id
     const divisionKey = bid.subdivision
       ? `${bid.division.code} - ${bid.subdivision.code}`
@@ -70,7 +68,7 @@ export default async function BidComparisonPage({
       groupedBids[projectKey][divisionKey] = []
     }
     groupedBids[projectKey][divisionKey].push(bid)
-  })
+  }
 
   return (
     <div className="space-y-6">
@@ -90,57 +88,7 @@ export default async function BidComparisonPage({
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <div>
-            <select
-              className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-              defaultValue={params.project || ''}
-              onChange={(e) => {
-                const url = new URL(window.location.href)
-                if (e.target.value) {
-                  url.searchParams.set('project', e.target.value)
-                } else {
-                  url.searchParams.delete('project')
-                }
-                window.location.href = url.toString()
-              }}
-            >
-              <option value="">All Projects</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <select
-              className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-              defaultValue={params.division || ''}
-              onChange={(e) => {
-                const url = new URL(window.location.href)
-                if (e.target.value) {
-                  url.searchParams.set('division', e.target.value)
-                } else {
-                  url.searchParams.delete('division')
-                }
-                window.location.href = url.toString()
-              }}
-            >
-              <option value="">All Divisions</option>
-              {divisions.map((division) => (
-                <option key={division.id} value={division.id}>
-                  {division.code} - {division.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardContent>
-      </Card>
+      <BidComparisonFilters projects={projects} divisions={divisions} />
 
       {/* Bid Comparison Groups */}
       <div className="space-y-6">
@@ -152,13 +100,12 @@ export default async function BidComparisonPage({
           </Card>
         ) : (
           Object.entries(groupedBids).map(([projectId, divisionGroups]) => {
-            const project = bids.find((b) => b.project.id === projectId)?.project
+            const project = bids.find((b: BidWithRelations) => b.project.id === projectId)?.project
             return (
               <div key={projectId} className="space-y-4">
                 <h2 className="text-2xl font-bold">{project?.name}</h2>
 
                 {Object.entries(divisionGroups).map(([divisionKey, bidList]) => {
-                  const lowestBid = bidList[0]
                   return (
                     <Card key={divisionKey}>
                       <CardHeader>

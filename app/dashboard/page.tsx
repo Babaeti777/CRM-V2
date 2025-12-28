@@ -68,6 +68,10 @@ export default async function DashboardPage() {
     take: 5,
   })
 
+  // Type definitions for mapped arrays
+  type ProjectWithDivisions = (typeof upcomingDeadlines)[number]
+  type InvitationWithRelations = (typeof followUpsNeeded)[number]
+
   const stats = [
     {
       title: 'Active Projects',
@@ -136,7 +140,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground">No upcoming deadlines</p>
             ) : (
               <div className="space-y-3">
-                {upcomingDeadlines.map((project) => (
+                {upcomingDeadlines.map((project: ProjectWithDivisions) => (
                   <div
                     key={project.id}
                     className="flex items-center justify-between border-b pb-2 last:border-0"
@@ -144,7 +148,7 @@ export default async function DashboardPage() {
                     <div>
                       <p className="font-medium">{project.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {project.projectDivisions.map((pd) => pd.division.name).join(', ')}
+                        {project.projectDivisions.map((pd: { division: { name: string } }) => pd.division.name).join(', ')}
                       </p>
                     </div>
                     <div className="text-right">
@@ -179,7 +183,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground">No follow-ups needed</p>
             ) : (
               <div className="space-y-3">
-                {followUpsNeeded.map((invitation) => (
+                {followUpsNeeded.map((invitation: InvitationWithRelations) => (
                   <div
                     key={invitation.id}
                     className="flex items-center justify-between border-b pb-2 last:border-0"

@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { getProjectStatusVariant } from '@/lib/utils'
+import type { ProjectStatus } from '@/lib/types'
 
 export default async function ProjectsPage() {
   const session = await auth()
@@ -40,20 +42,8 @@ export default async function ProjectsPage() {
     orderBy: { createdAt: 'desc' },
   })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'DRAFT':
-        return 'secondary'
-      case 'ACTIVE':
-        return 'default'
-      case 'CLOSED':
-        return 'outline'
-      case 'AWARDED':
-        return 'default'
-      default:
-        return 'secondary'
-    }
-  }
+  type ProjectWithDivisions = (typeof projects)[number]
+  type ProjectDivision = ProjectWithDivisions['projectDivisions'][number]
 
   return (
     <div className="space-y-6">
@@ -93,7 +83,7 @@ export default async function ProjectsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              projects.map((project) => (
+              projects.map((project: ProjectWithDivisions) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">
                     {project.name}
@@ -101,7 +91,7 @@ export default async function ProjectsPage() {
                   <TableCell>{project.location || '-'}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {project.projectDivisions.slice(0, 2).map((pd) => (
+                      {project.projectDivisions.slice(0, 2).map((pd: ProjectDivision) => (
                         <Badge key={pd.id} variant="secondary">
                           {pd.division.code}
                         </Badge>
@@ -117,7 +107,7 @@ export default async function ProjectsPage() {
                     {format(new Date(project.bidDueDate), 'MMM dd, yyyy')}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(project.status) as any}>
+                    <Badge variant={getProjectStatusVariant(project.status as ProjectStatus)}>
                       {project.status}
                     </Badge>
                   </TableCell>

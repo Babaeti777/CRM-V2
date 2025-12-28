@@ -1,60 +1,52 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { createSubcontractorSchema } from '@/lib/validations'
+import { ApiResponses } from '@/lib/api-utils'
 
 export async function POST(request: Request) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const body = await request.json()
-    const {
-      companyName,
-      contactPersonName,
-      email,
-      phone,
-      officeAddress,
-      city,
-      state,
-      zipCode,
-      notes,
-      divisionIds,
-      userId,
-    } = body
 
-    // Verify user matches session
-    if (userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Validate request body
+    const result = createSubcontractorSchema.safeParse(body)
+    if (!result.success) {
+      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
+    }
+
+    const data = result.data
+
+    if (data.userId !== session.user.id) {
+      return ApiResponses.forbidden()
     }
 
     const subcontractor = await prisma.subcontractor.create({
       data: {
-        companyName,
-        contactPersonName: contactPersonName || null,
-        email: email || null,
-        phone: phone || null,
-        officeAddress: officeAddress || null,
-        city: city || null,
-        state: state || null,
-        zipCode: zipCode || null,
-        notes: notes || null,
-        userId,
+        companyName: data.companyName,
+        contactPersonName: data.contactPersonName || null,
+        email: data.email || null,
+        phone: data.phone || null,
+        officeAddress: data.officeAddress || null,
+        city: data.city || null,
+        state: data.state || null,
+        zipCode: data.zipCode || null,
+        notes: data.notes || null,
+        userId: data.userId,
         subcontractorDivisions: {
-          create: divisionIds.map((divisionId: string) => ({
+          create: data.divisionIds.map((divisionId) => ({
             divisionId,
           })),
         },
       },
     })
 
-    return NextResponse.json(subcontractor, { status: 201 })
+    return ApiResponses.created(subcontractor)
   } catch (error) {
     console.error('Error creating subcontractor:', error)
-    return NextResponse.json(
-      { error: 'Failed to create subcontractor' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to create subcontractor')
   }
 }

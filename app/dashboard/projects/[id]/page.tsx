@@ -12,7 +12,7 @@ import Link from 'next/link'
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await auth()
   const userId = session?.user?.id
@@ -21,9 +21,11 @@ export default async function ProjectDetailPage({
     redirect('/login')
   }
 
+  const { id } = await params
+
   const [project, divisions, subdivisions] = await Promise.all([
     prisma.project.findUnique({
-      where: { id: params.id, userId },
+      where: { id, userId },
       include: {
         projectDivisions: {
           include: {

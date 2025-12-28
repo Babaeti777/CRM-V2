@@ -6,7 +6,7 @@ import { notFound, redirect } from 'next/navigation'
 export default async function EditSubcontractorPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await auth()
   const userId = session?.user?.id
@@ -15,9 +15,11 @@ export default async function EditSubcontractorPage({
     redirect('/login')
   }
 
+  const { id } = await params
+
   const [subcontractor, divisions] = await Promise.all([
     prisma.subcontractor.findUnique({
-      where: { id: params.id, userId },
+      where: { id, userId },
       include: {
         subcontractorDivisions: {
           include: {

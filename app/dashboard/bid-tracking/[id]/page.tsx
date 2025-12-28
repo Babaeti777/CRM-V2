@@ -6,7 +6,7 @@ import { notFound, redirect } from 'next/navigation'
 export default async function EditBidInvitationPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await auth()
   const userId = session?.user?.id
@@ -15,10 +15,12 @@ export default async function EditBidInvitationPage({
     redirect('/login')
   }
 
+  const { id } = await params
+
   const [invitation, projects, subcontractors, divisions, subdivisions] = await Promise.all([
     prisma.bidInvitation.findFirst({
       where: {
-        id: params.id,
+        id,
         project: { userId },
       },
       include: {

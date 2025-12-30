@@ -15,10 +15,19 @@ const authConfig = {
       const isOnLoginPage = nextUrl.pathname.startsWith('/login')
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard')
       const isOnApiAuth = nextUrl.pathname.startsWith('/api/auth')
+      const isOnRoot = nextUrl.pathname === '/'
 
       // Allow API auth routes
       if (isOnApiAuth) {
         return true
+      }
+
+      // Redirect from root to dashboard or login
+      if (isOnRoot) {
+        if (isLoggedIn) {
+          return Response.redirect(new URL('/dashboard', nextUrl))
+        }
+        return Response.redirect(new URL('/login', nextUrl))
       }
 
       // Redirect logged-in users away from login page

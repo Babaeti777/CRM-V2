@@ -1,53 +1,59 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { createBidInvitationSchema } from '@/lib/validations'
+import { ApiResponses } from '@/lib/api-utils'
 
 export async function POST(request: Request) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const body = await request.json()
 
+    // Validate request body
+    const result = createBidInvitationSchema.safeParse(body)
+    if (!result.success) {
+      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
+    }
+
+    const data = result.data
+
     // Verify project belongs to user
     const project = await prisma.project.findUnique({
-      where: { id: body.projectId, userId: session.user.id },
+      where: { id: data.projectId, userId: session.user.id },
     })
 
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+      return ApiResponses.notFound('Project')
     }
 
     const invitation = await prisma.bidInvitation.create({
       data: {
-        projectId: body.projectId,
-        subcontractorId: body.subcontractorId,
-        divisionId: body.divisionId,
-        subdivisionId: body.subdivisionId,
-        firstContactDate: body.firstContactDate,
-        contactMethod: body.contactMethod,
-        responseReceived: body.responseReceived,
-        responseDate: body.responseDate,
-        documentsSent: body.documentsSent,
-        documentsSentDate: body.documentsSentDate,
-        documentsDelivered: body.documentsDelivered,
-        documentsDeliveredDate: body.documentsDeliveredDate,
-        documentsRead: body.documentsRead,
-        documentsReadDate: body.documentsReadDate,
-        followUpDate: body.followUpDate,
-        status: body.status,
-        notes: body.notes,
+        projectId: data.projectId,
+        subcontractorId: data.subcontractorId,
+        divisionId: data.divisionId,
+        subdivisionId: data.subdivisionId || null,
+        firstContactDate: data.firstContactDate ? new Date(data.firstContactDate) : null,
+        contactMethod: data.contactMethod || null,
+        responseReceived: data.responseReceived,
+        responseDate: data.responseDate ? new Date(data.responseDate) : null,
+        documentsSent: data.documentsSent,
+        documentsSentDate: data.documentsSentDate ? new Date(data.documentsSentDate) : null,
+        documentsDelivered: data.documentsDelivered,
+        documentsDeliveredDate: data.documentsDeliveredDate ? new Date(data.documentsDeliveredDate) : null,
+        documentsRead: data.documentsRead,
+        documentsReadDate: data.documentsReadDate ? new Date(data.documentsReadDate) : null,
+        followUpDate: data.followUpDate ? new Date(data.followUpDate) : null,
+        status: data.status,
+        notes: data.notes || null,
       },
     })
 
-    return NextResponse.json(invitation, { status: 201 })
+    return ApiResponses.created(invitation)
   } catch (error) {
     console.error('Error creating bid invitation:', error)
-    return NextResponse.json(
-      { error: 'Failed to create bid invitation' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to create bid invitation')
   }
 }

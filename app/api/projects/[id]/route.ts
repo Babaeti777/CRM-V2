@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { updateProjectSchema } from '@/lib/validations'
+import { ApiResponses } from '@/lib/api-utils'
 
 export async function PUT(
   request: Request,
@@ -9,68 +10,61 @@ export async function PUT(
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const { id } = await params
     const body = await request.json()
-    const {
-      name,
-      description,
-      location,
-      bidDueDate,
-      rfiDate,
-      prebidSiteVisit,
-      prebidSiteVisitDate,
-      status,
-      projectDivisions,
-      userId,
-    } = body
 
-    if (userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Validate request body
+    const result = updateProjectSchema.safeParse(body)
+    if (!result.success) {
+      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
+    }
+
+    const data = result.data
+
+    if (data.userId && data.userId !== session.user.id) {
+      return ApiResponses.forbidden()
     }
 
     const existing = await prisma.project.findUnique({
-      where: { id, userId },
+      where: { id, userId: session.user.id },
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return ApiResponses.notFound('Project')
     }
 
     const project = await prisma.project.update({
       where: { id },
       data: {
-        name,
-        description: description || null,
-        location: location || null,
-        bidDueDate: new Date(bidDueDate),
-        rfiDate: rfiDate ? new Date(rfiDate) : null,
-        prebidSiteVisit,
-        prebidSiteVisitDate: prebidSiteVisitDate
-          ? new Date(prebidSiteVisitDate)
+        ...(data.name && { name: data.name }),
+        description: data.description ?? existing.description,
+        location: data.location ?? existing.location,
+        ...(data.bidDueDate && { bidDueDate: new Date(data.bidDueDate) }),
+        rfiDate: data.rfiDate ? new Date(data.rfiDate) : null,
+        prebidSiteVisit: data.prebidSiteVisit ?? existing.prebidSiteVisit,
+        prebidSiteVisitDate: data.prebidSiteVisitDate
+          ? new Date(data.prebidSiteVisitDate)
           : null,
-        status,
-        projectDivisions: {
-          deleteMany: {},
-          create: projectDivisions.map(
-            (pd: { divisionId: string; subdivisionId?: string }) => ({
+        ...(data.status && { status: data.status }),
+        ...(data.projectDivisions && {
+          projectDivisions: {
+            deleteMany: {},
+            create: data.projectDivisions.map((pd) => ({
               divisionId: pd.divisionId,
               subdivisionId: pd.subdivisionId || null,
-            })
-          ),
-        },
+            })),
+          },
+        }),
       },
     })
 
-    return NextResponse.json(project)
+    return ApiResponses.success(project)
   } catch (error) {
     console.error('Error updating project:', error)
-    return NextResponse.json(
-      { error: 'Failed to update project' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to update project')
   }
 }
 
@@ -81,7 +75,7 @@ export async function DELETE(
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const { id } = await params
@@ -91,19 +85,16 @@ export async function DELETE(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return ApiResponses.notFound('Project')
     }
 
     await prisma.project.delete({
       where: { id },
     })
 
-    return NextResponse.json({ success: true })
+    return ApiResponses.success({ success: true })
   } catch (error) {
     console.error('Error deleting project:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete project' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to delete project')
   }
 }

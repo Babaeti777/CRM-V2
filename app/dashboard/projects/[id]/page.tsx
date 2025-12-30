@@ -64,6 +64,10 @@ export default async function ProjectDetailPage({
     notFound()
   }
 
+  // Type definitions for nested arrays
+  type InvitationType = (typeof project.bidInvitations)[number]
+  type BidType = (typeof project.bids)[number]
+
   return (
     <div className="space-y-6">
       <div>
@@ -112,7 +116,7 @@ export default async function ProjectDetailPage({
                 </CardContent>
               </Card>
             ) : (
-              project.bidInvitations.map((invitation) => (
+              project.bidInvitations.map((invitation: InvitationType) => (
                 <Card key={invitation.id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -164,7 +168,7 @@ export default async function ProjectDetailPage({
                 </CardContent>
               </Card>
             ) : (
-              project.bids.map((bid) => (
+              project.bids.map((bid: BidType) => (
                 <Card key={bid.id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">

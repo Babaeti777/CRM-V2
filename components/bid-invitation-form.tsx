@@ -8,15 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
-
-interface BidInvitationFormProps {
-  projects: any[]
-  subcontractors: any[]
-  divisions: any[]
-  subdivisions: any[]
-  userId: string
-  invitation?: any
-}
+import type { BidInvitationFormProps } from '@/lib/types'
 
 export function BidInvitationForm({
   projects,
@@ -35,12 +27,12 @@ export function BidInvitationForm({
 
   const filteredSubcontractors = selectedDivision
     ? subcontractors.filter((s) =>
-        s.subcontractorDivisions.some((sd: any) => sd.divisionId === selectedDivision)
+        s.subcontractorDivisions.some((sd: { divisionId: string }) => sd.divisionId === selectedDivision)
       )
     : subcontractors
 
   const filteredSubdivisions = selectedDivision
-    ? subdivisions.filter((s) => s.divisionId === selectedDivision)
+    ? subdivisions.filter((s: { divisionId: string }) => s.divisionId === selectedDivision)
     : []
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

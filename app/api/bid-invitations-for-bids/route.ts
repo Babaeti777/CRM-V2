@@ -1,18 +1,21 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { ApiResponses } from '@/lib/api-utils'
+
+// Status values that indicate an invitation is ready for bid submission
+const READY_FOR_BID_STATUSES = ['RESPONDED', 'CONTACTED', 'AWAITING_RESPONSE'] as const
 
 export async function GET() {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return ApiResponses.unauthorized()
     }
 
     const invitations = await prisma.bidInvitation.findMany({
       where: {
         project: { userId: session.user.id },
-        status: { in: ['RESPONDED', 'CONTACTED', 'AWAITING_RESPONSE'] },
+        status: { in: [...READY_FOR_BID_STATUSES] },
       },
       include: {
         project: true,
@@ -23,12 +26,9 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(invitations)
+    return ApiResponses.success(invitations)
   } catch (error) {
     console.error('Error fetching invitations:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch invitations' },
-      { status: 500 }
-    )
+    return ApiResponses.serverError('Failed to fetch invitations')
   }
 }

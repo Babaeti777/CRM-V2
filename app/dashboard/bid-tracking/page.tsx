@@ -13,6 +13,22 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { format, isPast } from 'date-fns'
+import { getBidInvitationStatusVariant, formatStatus } from '@/lib/utils'
+import type { BidInvitationStatus } from '@/lib/types'
+
+// Helper to render status icon based on invitation state
+function getStatusIcon(invitation: { status: string; followUpDate: Date | null }) {
+  if (invitation.status === 'BID_SUBMITTED') {
+    return <CheckCircle2 className="h-4 w-4 text-green-600" />
+  }
+  if (invitation.status === 'DECLINED') {
+    return <XCircle className="h-4 w-4 text-red-600" />
+  }
+  if (invitation.followUpDate && isPast(new Date(invitation.followUpDate))) {
+    return <AlertCircle className="h-4 w-4 text-orange-600" />
+  }
+  return <Clock className="h-4 w-4 text-blue-600" />
+}
 
 export default async function BidTrackingPage({
   searchParams,
@@ -28,12 +44,9 @@ export default async function BidTrackingPage({
 
   const params = await searchParams
 
-  const whereClause: any = {
+  const whereClause = {
     project: { userId },
-  }
-
-  if (params.project) {
-    whereClause.projectId = params.project
+    ...(params.project && { projectId: params.project }),
   }
 
   const invitations = await prisma.bidInvitation.findMany({
@@ -47,34 +60,7 @@ export default async function BidTrackingPage({
     orderBy: { createdAt: 'desc' },
   })
 
-  const getStatusIcon = (invitation: any) => {
-    if (invitation.status === 'BID_SUBMITTED') {
-      return <CheckCircle2 className="h-4 w-4 text-green-600" />
-    }
-    if (invitation.status === 'DECLINED') {
-      return <XCircle className="h-4 w-4 text-red-600" />
-    }
-    if (
-      invitation.followUpDate &&
-      isPast(new Date(invitation.followUpDate))
-    ) {
-      return <AlertCircle className="h-4 w-4 text-orange-600" />
-    }
-    return <Clock className="h-4 w-4 text-blue-600" />
-  }
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'BID_SUBMITTED':
-        return 'default'
-      case 'DECLINED':
-        return 'destructive'
-      case 'AWAITING_RESPONSE':
-        return 'secondary'
-      default:
-        return 'outline'
-    }
-  }
+  type InvitationWithRelations = (typeof invitations)[number]
 
   return (
     <div className="space-y-6">
@@ -116,7 +102,7 @@ export default async function BidTrackingPage({
                 </TableCell>
               </TableRow>
             ) : (
-              invitations.map((invitation) => (
+              invitations.map((invitation: InvitationWithRelations) => (
                 <TableRow key={invitation.id}>
                   <TableCell>{getStatusIcon(invitation)}</TableCell>
                   <TableCell className="font-medium">
@@ -136,8 +122,8 @@ export default async function BidTrackingPage({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusVariant(invitation.status) as any}>
-                      {invitation.status.replace('_', ' ')}
+                    <Badge variant={getBidInvitationStatusVariant(invitation.status as BidInvitationStatus)}>
+                      {formatStatus(invitation.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>

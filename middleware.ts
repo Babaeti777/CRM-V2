@@ -1,19 +1,8 @@
-import { auth } from '@/auth'
+import NextAuth from 'next-auth'
+import authConfig from './auth.config'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
-  const isOnLoginPage = req.nextUrl.pathname.startsWith('/login')
-
-  // Redirect logged-in users away from login page
-  if (isLoggedIn && isOnLoginPage) {
-    return Response.redirect(new URL('/dashboard', req.url))
-  }
-
-  // Redirect non-logged-in users to login page (except for login page itself)
-  if (!isLoggedIn && !isOnLoginPage) {
-    return Response.redirect(new URL('/login', req.url))
-  }
-})
+// Use lightweight auth config for Edge middleware (no Prisma bundled)
+export const { auth: middleware } = NextAuth(authConfig)
 
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],

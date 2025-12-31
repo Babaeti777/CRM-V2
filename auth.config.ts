@@ -1,21 +1,37 @@
 import type { NextAuthConfig } from 'next-auth'
 import Google from 'next-auth/providers/google'
 
+// Validate required environment variables
+const googleClientId = process.env.GOOGLE_CLIENT_ID
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
+
+// Check if Google OAuth is properly configured
+const isGoogleConfigured = !!(googleClientId && googleClientSecret)
+
+// Log warning in development if not configured
+if (!isGoogleConfigured && process.env.NODE_ENV === 'development') {
+  console.warn(
+    '⚠️  Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env'
+  )
+}
+
 // Lightweight auth config for Edge middleware (no Prisma)
 const authConfig = {
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-        },
-      },
-    }),
-  ],
+  providers: isGoogleConfigured
+    ? [
+        Google({
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+          authorization: {
+            params: {
+              prompt: 'consent',
+              access_type: 'offline',
+              response_type: 'code',
+            },
+          },
+        }),
+      ]
+    : [],
   pages: {
     signIn: '/login',
     error: '/login',

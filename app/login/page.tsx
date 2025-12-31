@@ -2,7 +2,27 @@ import { signIn } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function LoginPage() {
+const errorMessages: Record<string, string> = {
+  OAuthSignin: 'Error starting Google sign in. Please try again.',
+  OAuthCallback: 'Error during Google sign in callback. Please try again.',
+  OAuthCreateAccount: 'Could not create account. Please try again.',
+  OAuthAccountNotLinked: 'This email is already linked to another account.',
+  Callback: 'Authentication callback error. Please try again.',
+  Default: 'An error occurred during sign in. Please try again.',
+  AccessDenied: 'Access denied. You may not have permission to sign in.',
+  Configuration: 'Server configuration error. Please contact support.',
+  Verification: 'Verification link expired or already used.',
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>
+}) {
+  const params = await searchParams
+  const error = params.error
+  const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
@@ -15,6 +35,11 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {errorMessage && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-4">
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+          )}
           <form
             action={async () => {
               'use server'

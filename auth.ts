@@ -12,5 +12,6 @@ export const {
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
+  debug: process.env.NODE_ENV === 'development',
   ...authConfig,
 })

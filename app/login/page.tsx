@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getGoogleAuthEnv } from '@/lib/env'
 
+type LoginSearchParams = {
+  error?: string
+  callbackUrl?: string
+}
+
 const errorMessages: Record<string, string> = {
   OAuthSignin: 'Error starting Google sign in. Please try again.',
   OAuthCallback: 'Error during Google sign in callback. Please try again.',
@@ -18,29 +23,21 @@ const errorMessages: Record<string, string> = {
   SessionRequired: 'Please sign in to continue.',
 }
 
-// Check if Google OAuth is configured
-const isGoogleConfigured = !!(
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET
-)
-const isAuthSecretConfigured = !!(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET)
-const isAuthReady = isGoogleConfigured && isAuthSecretConfigured
+const authEnv = getGoogleAuthEnv()
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; callbackUrl?: string }>
+  searchParams?: Promise<LoginSearchParams>
 }) {
-  const params = await searchParams
-  const error = params.error
+  const params = searchParams ? await searchParams : undefined
+  const error = params?.error
   const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
 
   // Show configuration warning if OAuth is not set up
-  const showConfigWarning = !isAuthReady && !error
-  const missingPieces: string[] = []
-  if (!process.env.GOOGLE_CLIENT_ID) missingPieces.push('GOOGLE_CLIENT_ID')
-  if (!process.env.GOOGLE_CLIENT_SECRET) missingPieces.push('GOOGLE_CLIENT_SECRET')
-  if (!isAuthSecretConfigured) missingPieces.push('AUTH_SECRET or NEXTAUTH_SECRET')
+  const showConfigWarning = !authEnv.isConfigured && !error
+  const missingPieces = authEnv.missingVariables
+  const isAuthReady = authEnv.isConfigured
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">

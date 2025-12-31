@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from 'next-auth'
 import Google from 'next-auth/providers/google'
+import { getGoogleAuthEnv } from './lib/env'
 
 // Validate required environment variables
 const googleClientId = process.env.GOOGLE_CLIENT_ID

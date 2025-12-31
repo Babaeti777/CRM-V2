@@ -2,7 +2,38 @@ import { signIn } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function LoginPage() {
+const errorMessages: Record<string, string> = {
+  OAuthSignin: 'Error starting Google sign in. Please try again.',
+  OAuthCallback: 'Error during Google sign in callback. Please try again.',
+  OAuthCreateAccount: 'Could not create account. Please try again.',
+  OAuthAccountNotLinked: 'This email is already linked to another account.',
+  Callback: 'Authentication callback error. Please try again.',
+  Default: 'An error occurred during sign in. Please try again.',
+  AccessDenied: 'Access denied. You may not have permission to sign in.',
+  Configuration: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET environment variables.',
+  Verification: 'Verification link expired or already used.',
+  MissingCSRF: 'Session expired. Please try again.',
+  SessionRequired: 'Please sign in to continue.',
+}
+
+// Check if Google OAuth is configured
+const isGoogleConfigured = !!(
+  process.env.GOOGLE_CLIENT_ID &&
+  process.env.GOOGLE_CLIENT_SECRET
+)
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>
+}) {
+  const params = await searchParams
+  const error = params.error
+  const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
+
+  // Show configuration warning if OAuth is not set up
+  const showConfigWarning = !isGoogleConfigured && !error
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
@@ -15,13 +46,36 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {errorMessage && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-4">
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+          )}
+          {showConfigWarning && (
+            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4">
+              <p className="text-sm text-yellow-800 font-medium">Setup Required</p>
+              <p className="text-sm text-yellow-700 mt-1">
+                Google OAuth is not configured. Please add the following environment variables:
+              </p>
+              <ul className="text-xs text-yellow-600 mt-2 space-y-1 font-mono">
+                <li>GOOGLE_CLIENT_ID</li>
+                <li>GOOGLE_CLIENT_SECRET</li>
+                <li>AUTH_SECRET</li>
+              </ul>
+            </div>
+          )}
           <form
             action={async () => {
               'use server'
               await signIn('google', { redirectTo: '/dashboard' })
             }}
           >
-            <Button type="submit" className="w-full" size="lg">
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={!isGoogleConfigured}
+            >
               <svg
                 className="mr-2 h-5 w-5"
                 aria-hidden="true"

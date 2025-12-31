@@ -2,25 +2,17 @@ import type { NextAuthConfig } from 'next-auth'
 import Google from 'next-auth/providers/google'
 import { getGoogleAuthEnv } from './lib/env'
 
-// Validate required environment variables
-const googleClientId = process.env.GOOGLE_CLIENT_ID
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
-const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
-
-// Track missing pieces for clearer diagnostics
-const missingConfig: string[] = []
-
-if (!googleClientId) missingConfig.push('GOOGLE_CLIENT_ID')
-if (!googleClientSecret) missingConfig.push('GOOGLE_CLIENT_SECRET')
-if (!authSecret) missingConfig.push('AUTH_SECRET or NEXTAUTH_SECRET')
+const authEnv = getGoogleAuthEnv()
+const { googleClientId, googleClientSecret, authSecret, isConfigured, missingVariables } =
+  authEnv
 
 // Check if Google OAuth is properly configured
-const isAuthConfigured = missingConfig.length === 0
+const isAuthConfigured = isConfigured
 
 // Log warning in development if not configured
 if (!isAuthConfigured && process.env.NODE_ENV === 'development') {
   console.warn(
-    `⚠️  Google OAuth not fully configured. Missing: ${missingConfig.join(', ')}`
+    `⚠️  Google OAuth not fully configured. Missing: ${missingVariables.join(', ')}`
   )
 }
 
@@ -29,8 +21,8 @@ const authConfig = {
   providers: isAuthConfigured
     ? [
         Google({
-          clientId: googleClientId,
-          clientSecret: googleClientSecret,
+          clientId: googleClientId!,
+          clientSecret: googleClientSecret!,
           authorization: {
             params: {
               prompt: 'consent',

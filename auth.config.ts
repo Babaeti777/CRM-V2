@@ -15,10 +15,10 @@ if (!googleClientSecret) missingConfig.push('GOOGLE_CLIENT_SECRET')
 if (!authSecret) missingConfig.push('AUTH_SECRET or NEXTAUTH_SECRET')
 
 // Check if Google OAuth is properly configured
-const isGoogleConfigured = missingConfig.length === 0
+const isAuthConfigured = missingConfig.length === 0
 
 // Log warning in development if not configured
-if (!isConfigured && process.env.NODE_ENV === 'development') {
+if (!isAuthConfigured && process.env.NODE_ENV === 'development') {
   console.warn(
     `⚠️  Google OAuth not fully configured. Missing: ${missingConfig.join(', ')}`
   )
@@ -26,8 +26,7 @@ if (!isConfigured && process.env.NODE_ENV === 'development') {
 
 // Lightweight auth config for Edge middleware (no Prisma)
 const authConfig = {
-  secret: authSecret,
-  providers: isConfigured
+  providers: isAuthConfigured
     ? [
         Google({
           clientId: googleClientId,

@@ -10,17 +10,9 @@ const errorMessages: Record<string, string> = {
   Callback: 'Authentication callback error. Please try again.',
   Default: 'An error occurred during sign in. Please try again.',
   AccessDenied: 'Access denied. You may not have permission to sign in.',
-  Configuration: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET environment variables.',
+  Configuration: 'Google OAuth is not configured. Check your environment variables.',
   Verification: 'Verification link expired or already used.',
-  MissingCSRF: 'Session expired. Please try again.',
-  SessionRequired: 'Please sign in to continue.',
 }
-
-// Check if Google OAuth is configured
-const isGoogleConfigured = !!(
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET
-)
 
 export default async function LoginPage({
   searchParams,
@@ -30,9 +22,6 @@ export default async function LoginPage({
   const params = await searchParams
   const error = params.error
   const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
-
-  // Show configuration warning if OAuth is not set up
-  const showConfigWarning = !isGoogleConfigured && !error
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -51,31 +40,13 @@ export default async function LoginPage({
               <p className="text-sm text-red-700">{errorMessage}</p>
             </div>
           )}
-          {showConfigWarning && (
-            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4">
-              <p className="text-sm text-yellow-800 font-medium">Setup Required</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Google OAuth is not configured. Please add the following environment variables:
-              </p>
-              <ul className="text-xs text-yellow-600 mt-2 space-y-1 font-mono">
-                <li>GOOGLE_CLIENT_ID</li>
-                <li>GOOGLE_CLIENT_SECRET</li>
-                <li>AUTH_SECRET</li>
-              </ul>
-            </div>
-          )}
           <form
             action={async () => {
               'use server'
               await signIn('google', { redirectTo: '/dashboard' })
             }}
           >
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={!isGoogleConfigured}
-            >
+            <Button type="submit" className="w-full" size="lg">
               <svg
                 className="mr-2 h-5 w-5"
                 aria-hidden="true"

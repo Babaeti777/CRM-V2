@@ -16,8 +16,7 @@ const errorMessages: Record<string, string> = {
   Callback: 'Authentication callback error. Please try again.',
   Default: 'An error occurred during sign in. Please try again.',
   AccessDenied: 'Access denied. You may not have permission to sign in.',
-  Configuration:
-    'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET (or NEXTAUTH_SECRET) environment variables.',
+  Configuration: configurationMessage,
   Verification: 'Verification link expired or already used.',
   MissingCSRF: 'Session expired. Please try again.',
   SessionRequired: 'Please sign in to continue.',

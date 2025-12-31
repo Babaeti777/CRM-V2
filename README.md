@@ -55,7 +55,7 @@ cp .env.example .env
 Required environment variables:
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXTAUTH_URL` - Your application URL (http://localhost:3000 for local)
-- `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`) - Generate with `openssl rand -base64 32`
 - `GOOGLE_CLIENT_ID` - From Google Cloud Console
 - `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
 

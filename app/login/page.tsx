@@ -1,6 +1,7 @@
 import { signIn } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { getGoogleAuthEnv } from '@/lib/env'
 
 const errorMessages: Record<string, string> = {
   OAuthSignin: 'Error starting Google sign in. Please try again.',
@@ -17,10 +18,7 @@ const errorMessages: Record<string, string> = {
 }
 
 // Check if Google OAuth is configured
-const isGoogleConfigured = !!(
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET
-)
+const googleConfig = getGoogleAuthEnv()
 
 export default async function LoginPage({
   searchParams,
@@ -32,7 +30,7 @@ export default async function LoginPage({
   const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
 
   // Show configuration warning if OAuth is not set up
-  const showConfigWarning = !isGoogleConfigured && !error
+  const showConfigWarning = !googleConfig.isConfigured && !error
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -58,9 +56,9 @@ export default async function LoginPage({
                 Google OAuth is not configured. Please add the following environment variables:
               </p>
               <ul className="text-xs text-yellow-600 mt-2 space-y-1 font-mono">
-                <li>GOOGLE_CLIENT_ID</li>
-                <li>GOOGLE_CLIENT_SECRET</li>
-                <li>AUTH_SECRET</li>
+                {googleConfig.missingVariables.map((variable) => (
+                  <li key={variable}>{variable}</li>
+                ))}
               </ul>
             </div>
           )}
@@ -74,7 +72,7 @@ export default async function LoginPage({
               type="submit"
               className="w-full"
               size="lg"
-              disabled={!isGoogleConfigured}
+              disabled={!googleConfig.isConfigured}
             >
               <svg
                 className="mr-2 h-5 w-5"

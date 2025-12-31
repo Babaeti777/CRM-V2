@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getGoogleAuthEnv } from '@/lib/env'
 
+type LoginSearchParams = {
+  error?: string
+  callbackUrl?: string
+}
+
 const errorMessages: Record<string, string> = {
   OAuthSignin: 'Error starting Google sign in. Please try again.',
   OAuthCallback: 'Error during Google sign in callback. Please try again.',
@@ -23,7 +28,7 @@ const authEnv = getGoogleAuthEnv()
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; callbackUrl?: string }>
+  searchParams?: Promise<LoginSearchParams>
 }) {
   const params = searchParams ? await searchParams : undefined
   const error = params?.error

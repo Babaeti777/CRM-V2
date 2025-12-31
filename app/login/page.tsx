@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getGoogleAuthEnv } from '@/lib/env'
 
-const authEnv = getGoogleAuthEnv()
-const configurationMessage: string = authEnv.missingVariables.length
-  ? `Google OAuth is not configured. Missing: ${authEnv.missingVariables.join(', ')}. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET (or NEXTAUTH_SECRET) environment variables.`
-  : 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET (or NEXTAUTH_SECRET) environment variables.'
+type LoginSearchParams = {
+  error?: string
+  callbackUrl?: string
+}
 
 const errorMessages: Record<string, string> = {
   OAuthSignin: 'Error starting Google sign in. Please try again.',
@@ -22,10 +22,12 @@ const errorMessages: Record<string, string> = {
   SessionRequired: 'Please sign in to continue.',
 }
 
+const authEnv = getGoogleAuthEnv()
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; callbackUrl?: string }>
+  searchParams?: Promise<LoginSearchParams>
 }) {
   const params = searchParams ? await searchParams : undefined
   const error = params?.error

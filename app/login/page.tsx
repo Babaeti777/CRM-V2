@@ -11,14 +11,20 @@ const errorMessages: Record<string, string> = {
   Callback: 'Authentication callback error. Please try again.',
   Default: 'An error occurred during sign in. Please try again.',
   AccessDenied: 'Access denied. You may not have permission to sign in.',
-  Configuration: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET environment variables.',
+  Configuration:
+    'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and AUTH_SECRET (or NEXTAUTH_SECRET) environment variables.',
   Verification: 'Verification link expired or already used.',
   MissingCSRF: 'Session expired. Please try again.',
   SessionRequired: 'Please sign in to continue.',
 }
 
 // Check if Google OAuth is configured
-const googleConfig = getGoogleAuthEnv()
+const isGoogleConfigured = !!(
+  process.env.GOOGLE_CLIENT_ID &&
+  process.env.GOOGLE_CLIENT_SECRET
+)
+const isAuthSecretConfigured = !!(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET)
+const isAuthReady = isGoogleConfigured && isAuthSecretConfigured
 
 export default async function LoginPage({
   searchParams,
@@ -30,7 +36,11 @@ export default async function LoginPage({
   const errorMessage = error ? (errorMessages[error] || errorMessages.Default) : null
 
   // Show configuration warning if OAuth is not set up
-  const showConfigWarning = !googleConfig.isConfigured && !error
+  const showConfigWarning = !isAuthReady && !error
+  const missingPieces: string[] = []
+  if (!process.env.GOOGLE_CLIENT_ID) missingPieces.push('GOOGLE_CLIENT_ID')
+  if (!process.env.GOOGLE_CLIENT_SECRET) missingPieces.push('GOOGLE_CLIENT_SECRET')
+  if (!isAuthSecretConfigured) missingPieces.push('AUTH_SECRET or NEXTAUTH_SECRET')
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -56,8 +66,8 @@ export default async function LoginPage({
                 Google OAuth is not configured. Please add the following environment variables:
               </p>
               <ul className="text-xs text-yellow-600 mt-2 space-y-1 font-mono">
-                {googleConfig.missingVariables.map((variable) => (
-                  <li key={variable}>{variable}</li>
+                {missingPieces.map((piece) => (
+                  <li key={piece}>{piece}</li>
                 ))}
               </ul>
             </div>
@@ -72,7 +82,7 @@ export default async function LoginPage({
               type="submit"
               className="w-full"
               size="lg"
-              disabled={!googleConfig.isConfigured}
+              disabled={!isAuthReady}
             >
               <svg
                 className="mr-2 h-5 w-5"

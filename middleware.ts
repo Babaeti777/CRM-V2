@@ -1,21 +1,32 @@
-import { auth } from '@/auth'
+import NextAuth from 'next-auth'
+import Google from 'next-auth/providers/google'
+
+// Edge-compatible auth for middleware only
+const { auth } = NextAuth({
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+  trustHost: true,
+  pages: {
+    signIn: '/login',
+  },
+})
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth?.user
   const pathname = req.nextUrl.pathname
 
-  // Redirect root
   if (pathname === '/') {
-    const dest = isLoggedIn ? '/dashboard' : '/login'
-    return Response.redirect(new URL(dest, req.nextUrl))
+    return Response.redirect(new URL(isLoggedIn ? '/dashboard' : '/login', req.nextUrl))
   }
 
-  // Redirect logged-in users away from login
   if (pathname === '/login' && isLoggedIn) {
     return Response.redirect(new URL('/dashboard', req.nextUrl))
   }
 
-  // Protect dashboard
   if (pathname.startsWith('/dashboard') && !isLoggedIn) {
     return Response.redirect(new URL('/login', req.nextUrl))
   }

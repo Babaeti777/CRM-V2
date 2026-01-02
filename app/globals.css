@@ -66,4 +66,28 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Dark mode styles for native form elements */
+  select,
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    @apply bg-background text-foreground;
+    color-scheme: light;
+  }
+
+  .dark select,
+  .dark input[type="date"],
+  .dark input[type="datetime-local"],
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+
+  select option {
+    @apply bg-background text-foreground;
+  }
+
+  .dark select option {
+    @apply bg-popover text-popover-foreground;
+  }
 }

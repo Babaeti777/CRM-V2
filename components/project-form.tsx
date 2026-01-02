@@ -196,7 +196,7 @@ export function ProjectForm({
               id="description"
               name="description"
               defaultValue={project?.description || ''}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               placeholder="Project description..."
             />
           </div>
@@ -279,7 +279,7 @@ export function ProjectForm({
               id="status"
               name="status"
               defaultValue={project?.status || 'DRAFT'}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               required
             >
               <option value="DRAFT">Draft</option>
@@ -322,7 +322,7 @@ export function ProjectForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg">
                   {divisions.map((division) => (
                     <div key={division.id}>
                       <button
@@ -341,16 +341,16 @@ export function ProjectForm({
                             }
                           }
                         }}
-                        className="w-full text-left px-3 py-2 hover:bg-accent font-medium"
+                        className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground font-medium"
                       >
                         {division.code} - {division.name}
                       </button>
                       {selectedDivisionForSubdivision === division.id && (
-                        <div className="bg-muted">
+                        <div className="bg-muted text-muted-foreground">
                           <button
                             type="button"
                             onClick={() => addDivision(division.id)}
-                            className="w-full text-left px-6 py-2 text-sm hover:bg-accent"
+                            className="w-full text-left px-6 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                           >
                             <em>No subdivision (general)</em>
                           </button>
@@ -363,7 +363,7 @@ export function ProjectForm({
                                 onClick={() =>
                                   addDivision(division.id, subdivision.id)
                                 }
-                                className="w-full text-left px-6 py-2 text-sm hover:bg-accent"
+                                className="w-full text-left px-6 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                               >
                                 {subdivision.code} - {subdivision.name}
                               </button>

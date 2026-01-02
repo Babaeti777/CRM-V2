@@ -144,7 +144,7 @@ export function BidInvitationForm({
                 name="projectId"
                 defaultValue={invitation?.projectId}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
                 required
               >
                 <option value="">Select project...</option>
@@ -165,7 +165,7 @@ export function BidInvitationForm({
                 name="divisionId"
                 defaultValue={invitation?.divisionId}
                 onChange={(e) => setSelectedDivision(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
                 required
               >
                 <option value="">Select division...</option>
@@ -185,7 +185,7 @@ export function BidInvitationForm({
                 id="subdivisionId"
                 name="subdivisionId"
                 defaultValue={invitation?.subdivisionId || ''}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
               >
                 <option value="">None</option>
                 {filteredSubdivisions.map((subdivision) => (
@@ -204,7 +204,7 @@ export function BidInvitationForm({
                 id="subcontractorId"
                 name="subcontractorId"
                 defaultValue={invitation?.subcontractorId}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
                 required
               >
                 <option value="">Select subcontractor...</option>
@@ -238,7 +238,7 @@ export function BidInvitationForm({
                 id="contactMethod"
                 name="contactMethod"
                 defaultValue={invitation?.contactMethod || ''}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
               >
                 <option value="">Select method...</option>
                 <option value="EMAIL">Email</option>
@@ -387,7 +387,7 @@ export function BidInvitationForm({
               id="status"
               name="status"
               defaultValue={invitation?.status || 'INVITED'}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
               required
             >
               <option value="INVITED">Invited</option>
@@ -405,7 +405,7 @@ export function BidInvitationForm({
               id="notes"
               name="notes"
               defaultValue={invitation?.notes || ''}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm placeholder:text-muted-foreground"
               placeholder="Additional notes..."
             />
           </div>

@@ -263,7 +263,7 @@ export function SubcontractorForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg">
                   {divisions.map((division) => (
                     <button
                       key={division.id}
@@ -272,7 +272,7 @@ export function SubcontractorForm({
                         toggleDivision(division.id)
                         setShowDivisionDropdown(false)
                       }}
-                      className={`w-full text-left px-3 py-2 hover:bg-accent ${
+                      className={`w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground ${
                         selectedDivisions.includes(division.id)
                           ? 'bg-muted text-muted-foreground'
                           : ''
@@ -294,7 +294,7 @@ export function SubcontractorForm({
               id="notes"
               name="notes"
               defaultValue={subcontractor?.notes || ''}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Additional notes about this subcontractor..."
             />
           </div>

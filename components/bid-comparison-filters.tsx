@@ -54,7 +54,7 @@ export function BidComparisonFilters({ projects, divisions }: BidComparisonFilte
       <CardContent className="flex gap-4">
         <div>
           <select
-            className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+            className="flex h-9 w-[200px] rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
             value={currentProject}
             onChange={(e) => handleProjectChange(e.target.value)}
           >
@@ -68,7 +68,7 @@ export function BidComparisonFilters({ projects, divisions }: BidComparisonFilte
         </div>
         <div>
           <select
-            className="flex h-9 w-[200px] rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+            className="flex h-9 w-[200px] rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm"
             value={currentDivision}
             onChange={(e) => handleDivisionChange(e.target.value)}
           >

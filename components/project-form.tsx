@@ -322,7 +322,7 @@ export function ProjectForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
                   {divisions.map((division) => (
                     <div key={division.id}>
                       <button
@@ -341,16 +341,16 @@ export function ProjectForm({
                             }
                           }
                         }}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 font-medium"
+                        className="w-full text-left px-3 py-2 hover:bg-accent font-medium"
                       >
                         {division.code} - {division.name}
                       </button>
                       {selectedDivisionForSubdivision === division.id && (
-                        <div className="bg-gray-50">
+                        <div className="bg-muted">
                           <button
                             type="button"
                             onClick={() => addDivision(division.id)}
-                            className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100"
+                            className="w-full text-left px-6 py-2 text-sm hover:bg-accent"
                           >
                             <em>No subdivision (general)</em>
                           </button>
@@ -363,7 +363,7 @@ export function ProjectForm({
                                 onClick={() =>
                                   addDivision(division.id, subdivision.id)
                                 }
-                                className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100"
+                                className="w-full text-left px-6 py-2 text-sm hover:bg-accent"
                               >
                                 {subdivision.code} - {subdivision.name}
                               </button>

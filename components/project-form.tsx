@@ -322,7 +322,7 @@ export function ProjectForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
                   {divisions.map((division) => (
                     <div key={division.id}>
                       <button

@@ -33,7 +33,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card">
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center border-b px-6">

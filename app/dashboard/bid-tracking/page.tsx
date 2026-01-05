@@ -79,7 +79,7 @@ export default async function BidTrackingPage({
         </Link>
       </div>
 
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

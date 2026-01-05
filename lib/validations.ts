@@ -26,7 +26,7 @@ export const createProjectSchema = z.object({
   prebidSiteVisitDate: z.string().or(z.date()).optional().nullable(),
   status: z.enum(['DRAFT', 'ACTIVE', 'CLOSED', 'AWARDED']).default('DRAFT'),
   projectDivisions: z.array(projectDivisionSchema).min(1, 'At least one division is required'),
-  userId: z.string().min(1),
+  userId: z.string().min(1).optional(),
 })
 
 export const updateProjectSchema = createProjectSchema.partial().extend({

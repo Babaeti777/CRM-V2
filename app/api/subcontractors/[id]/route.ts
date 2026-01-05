@@ -24,10 +24,6 @@ export async function PUT(
 
     const data = result.data
 
-    if (data.userId && data.userId !== session.user.id) {
-      return ApiResponses.forbidden()
-    }
-
     const existing = await prisma.subcontractor.findUnique({
       where: { id, userId: session.user.id },
     })

@@ -20,10 +20,6 @@ export async function POST(request: Request) {
 
     const data = result.data
 
-    if (data.userId !== session.user.id) {
-      return ApiResponses.forbidden()
-    }
-
     const subcontractor = await prisma.subcontractor.create({
       data: {
         companyName: data.companyName,
@@ -35,7 +31,7 @@ export async function POST(request: Request) {
         state: data.state || null,
         zipCode: data.zipCode || null,
         notes: data.notes || null,
-        userId: data.userId,
+        userId: session.user.id,
         subcontractorDivisions: {
           create: data.divisionIds.map((divisionId) => ({
             divisionId,

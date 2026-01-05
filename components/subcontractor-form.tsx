@@ -33,15 +33,10 @@ interface Subcontractor {
 
 interface SubcontractorFormProps {
   divisions: Division[]
-  userId: string
   subcontractor?: Subcontractor
 }
 
-export function SubcontractorForm({
-  divisions,
-  userId,
-  subcontractor,
-}: SubcontractorFormProps) {
+export function SubcontractorForm({ divisions, subcontractor }: SubcontractorFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedDivisions, setSelectedDivisions] = useState<string[]>(
@@ -67,7 +62,6 @@ export function SubcontractorForm({
       zipCode: formData.get('zipCode') as string,
       notes: formData.get('notes') as string,
       divisionIds: selectedDivisions,
-      userId,
     }
 
     try {

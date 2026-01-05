@@ -24,7 +24,7 @@ export default async function NewSubcontractorPage() {
         </p>
       </div>
 
-      <SubcontractorForm divisions={divisions} userId={userId} />
+      <SubcontractorForm divisions={divisions} />
     </div>
   )
 }

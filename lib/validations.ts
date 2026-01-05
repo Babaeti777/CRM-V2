@@ -76,7 +76,6 @@ export const createSubcontractorSchema = z.object({
     .nullable()
     .transform(val => val ? sanitizeHTML(val) : val),
   divisionIds: z.array(z.string()).min(1, 'At least one division is required'),
-  userId: z.string().min(1),
 })
 
 export const updateSubcontractorSchema = createSubcontractorSchema.partial().extend({

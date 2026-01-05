@@ -176,6 +176,254 @@ The system comes pre-populated with 27 CSI MasterFormat 2023 divisions:
 
 Plus 60+ common subdivisions for detailed categorization.
 
+## API Documentation
+
+### Authentication
+
+All API endpoints (except `/api/health`) require authentication. Include the session cookie in your requests.
+
+### API Response Format
+
+All API responses follow a standardized format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error description",
+    "code": "ERROR_CODE"
+  }
+}
+```
+
+### Rate Limiting
+
+API endpoints are rate-limited to prevent abuse:
+- **Query endpoints (GET)**: 100 requests/minute
+- **Mutation endpoints (POST/PUT/DELETE)**: 30 requests/minute
+
+Rate limit headers are included in all responses:
+```
+X-RateLimit-Limit: 30
+X-RateLimit-Remaining: 29
+X-RateLimit-Reset: 2026-01-05T12:00:00Z
+```
+
+### Projects API
+
+#### Create Project
+
+```http
+POST /api/projects
+Content-Type: application/json
+
+{
+  "name": "Downtown Office Building",
+  "description": "New 5-story office building",
+  "location": "123 Main St, New York, NY",
+  "bidDueDate": "2026-12-31",
+  "rfiDate": "2026-11-30",
+  "prebidSiteVisit": true,
+  "prebidSiteVisitDate": "2026-10-15",
+  "status": "ACTIVE",
+  "projectDivisions": [
+    { "divisionId": "div-123", "subdivisionId": "subdiv-456" }
+  ],
+  "userId": "user-123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "proj-789",
+    "name": "Downtown Office Building",
+    ...
+  }
+}
+```
+
+#### Get Projects
+
+```http
+GET /api/projects
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "proj-789",
+      "name": "Downtown Office Building",
+      "status": "ACTIVE",
+      ...
+    }
+  ]
+}
+```
+
+### Subcontractors API
+
+#### Create Subcontractor
+
+```http
+POST /api/subcontractors
+Content-Type: application/json
+
+{
+  "companyName": "ABC Construction",
+  "contactPersonName": "John Doe",
+  "email": "john@abc.com",
+  "phone": "555-1234",
+  "divisionIds": ["div-123", "div-456"],
+  "userId": "user-123"
+}
+```
+
+### Bid Invitations API
+
+#### Create Bid Invitation
+
+```http
+POST /api/bid-invitations
+Content-Type: application/json
+
+{
+  "projectId": "proj-789",
+  "subcontractorId": "sub-123",
+  "divisionId": "div-456",
+  "subdivisionId": "subdiv-789",
+  "status": "INVITED",
+  "notes": "Please respond by next week"
+}
+```
+
+### Bids API
+
+#### Create Bid
+
+```http
+POST /api/bids
+Content-Type: application/json
+
+{
+  "bidInvitationId": "inv-123",
+  "bidAmount": 50000.00,
+  "validUntil": "2026-12-31",
+  "notes": "Includes all materials and labor"
+}
+```
+
+### Health Check
+
+```http
+GET /api/health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-01-05T12:00:00Z",
+  "services": {
+    "database": {
+      "status": "up",
+      "responseTime": "15ms"
+    },
+    "api": {
+      "status": "up"
+    }
+  },
+  "version": "0.1.0",
+  "environment": "production"
+}
+```
+
+### Error Codes
+
+Common error codes returned by the API:
+
+| Code | Description |
+|------|-------------|
+| `UNAUTHORIZED` | Authentication required or invalid |
+| `FORBIDDEN` | Insufficient permissions |
+| `NOT_FOUND` | Resource not found |
+| `BAD_REQUEST` | Invalid request data |
+| `VALIDATION_ERROR` | Input validation failed |
+| `RATE_LIMIT_EXCEEDED` | Too many requests |
+| `INTERNAL_ERROR` | Server error |
+
+### Example: Complete Workflow
+
+```javascript
+// 1. Create a project
+const project = await fetch('/api/projects', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'New Office Building',
+    bidDueDate: '2026-12-31',
+    projectDivisions: [{ divisionId: 'div-concrete' }],
+    userId: session.user.id
+  })
+})
+
+// 2. Create a bid invitation
+const invitation = await fetch('/api/bid-invitations', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    projectId: project.data.id,
+    subcontractorId: 'sub-123',
+    divisionId: 'div-concrete',
+    status: 'INVITED'
+  })
+})
+
+// 3. Submit a bid
+const bid = await fetch('/api/bids', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    bidInvitationId: invitation.data.id,
+    bidAmount: 75000,
+    validUntil: '2026-12-31'
+  })
+})
+```
+
+## Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
 ## Support
 
 For issues or questions, please open an issue on GitHub.

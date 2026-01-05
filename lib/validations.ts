@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sanitizeInput, sanitizeEmail, sanitizePhone, sanitizeHTML } from './sanitize'
 
 // Project validation schemas
 export const projectDivisionSchema = z.object({
@@ -7,9 +8,18 @@ export const projectDivisionSchema = z.object({
 })
 
 export const createProjectSchema = z.object({
-  name: z.string().min(1, 'Project name is required'),
-  description: z.string().optional().nullable(),
-  location: z.string().optional().nullable(),
+  name: z.string()
+    .min(1, 'Project name is required')
+    .max(255, 'Project name must be less than 255 characters')
+    .transform(sanitizeHTML),
+  description: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeHTML(val) : val),
+  location: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val) : val),
   bidDueDate: z.string().or(z.date()),
   rfiDate: z.string().or(z.date()).optional().nullable(),
   prebidSiteVisit: z.boolean().default(false),
@@ -25,15 +35,46 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
 
 // Subcontractor validation schemas
 export const createSubcontractorSchema = z.object({
-  companyName: z.string().min(1, 'Company name is required'),
-  contactPersonName: z.string().optional().nullable(),
-  email: z.string().email('Invalid email').optional().nullable().or(z.literal('')),
-  phone: z.string().optional().nullable(),
-  officeAddress: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  state: z.string().optional().nullable(),
-  zipCode: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  companyName: z.string()
+    .min(1, 'Company name is required')
+    .max(255, 'Company name must be less than 255 characters')
+    .transform(sanitizeInput),
+  contactPersonName: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val) : val),
+  email: z.string()
+    .email('Please enter a valid email address')
+    .optional()
+    .nullable()
+    .or(z.literal(''))
+    .transform(val => val ? sanitizeEmail(val) : val),
+  phone: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizePhone(val) : val),
+  officeAddress: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val) : val),
+  city: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val) : val),
+  state: z.string()
+    .max(2, 'State code must be 2 characters')
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val).toUpperCase() : val),
+  zipCode: z.string()
+    .max(10, 'Zip code must be less than 10 characters')
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeInput(val) : val),
+  notes: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeHTML(val) : val),
   divisionIds: z.array(z.string()).min(1, 'At least one division is required'),
   userId: z.string().min(1),
 })
@@ -67,7 +108,10 @@ export const createBidInvitationSchema = z.object({
     'DECLINED',
     'BID_SUBMITTED',
   ]).default('INVITED'),
-  notes: z.string().optional().nullable(),
+  notes: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeHTML(val) : val),
 })
 
 export const updateBidInvitationSchema = createBidInvitationSchema.partial()
@@ -77,7 +121,10 @@ export const createBidSchema = z.object({
   bidInvitationId: z.string().min(1, 'Bid invitation is required'),
   bidAmount: z.number().positive('Bid amount must be positive'),
   validUntil: z.string().or(z.date()).optional().nullable(),
-  notes: z.string().optional().nullable(),
+  notes: z.string()
+    .optional()
+    .nullable()
+    .transform(val => val ? sanitizeHTML(val) : val),
 })
 
 export const updateBidSchema = createBidSchema.partial()

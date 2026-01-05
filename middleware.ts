@@ -1,26 +1,45 @@
 import { auth } from '@/auth'
 
+/**
+ * Public routes that don't require authentication
+ */
+const PUBLIC_ROUTES = ['/login']
+
+/**
+ * Routes that should redirect to dashboard if authenticated
+ */
+const AUTH_ROUTES = ['/login']
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth?.user
   const pathname = req.nextUrl.pathname
 
-  // Redirect root
+  // Redirect root to appropriate destination
   if (pathname === '/') {
-    const dest = isLoggedIn ? '/dashboard' : '/login'
-    return Response.redirect(new URL(dest, req.nextUrl))
+    const destination = isLoggedIn ? '/dashboard' : '/login'
+    return Response.redirect(new URL(destination, req.nextUrl))
   }
 
-  // Redirect logged-in users away from login
-  if (pathname === '/login' && isLoggedIn) {
-    return Response.redirect(new URL('/dashboard', req.nextUrl))
+  // Redirect logged-in users away from auth routes (login)
+  if (AUTH_ROUTES.includes(pathname) && isLoggedIn) {
+    // Check if there's a callback URL to redirect to
+    const callbackUrl = req.nextUrl.searchParams.get('callbackUrl')
+    const destination = callbackUrl || '/dashboard'
+    return Response.redirect(new URL(destination, req.nextUrl))
   }
 
-  // Protect dashboard
+  // Protect dashboard routes
   if (pathname.startsWith('/dashboard') && !isLoggedIn) {
-    return Response.redirect(new URL('/login', req.nextUrl))
+    // Preserve the intended destination as callback URL
+    const loginUrl = new URL('/login', req.nextUrl)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return Response.redirect(loginUrl)
   }
+
+  // Allow request to proceed
+  return
 })
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }

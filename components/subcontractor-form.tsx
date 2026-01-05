@@ -272,9 +272,9 @@ export function SubcontractorForm({
                         toggleDivision(division.id)
                         setShowDivisionDropdown(false)
                       }}
-                      className={`w-full text-left px-3 py-2 hover:bg-gray-100 ${
+                      className={`w-full text-left px-3 py-2 hover:bg-muted ${
                         selectedDivisions.includes(division.id)
-                          ? 'bg-gray-50 text-muted-foreground'
+                          ? 'bg-muted/60 text-muted-foreground'
                           : ''
                       }`}
                     >

@@ -31,12 +31,12 @@ export default async function DashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card">
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center border-b px-6">
+          <div className="flex h-16 items-center border-b border-border px-6">
             <Building2 className="h-6 w-6 text-primary" />
             <span className="ml-2 text-lg font-bold">Bid Manager</span>
           </div>
@@ -47,7 +47,7 @@ export default async function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <item.icon className="mr-3 h-5 w-5" />
                 {item.label}
@@ -56,11 +56,11 @@ export default async function DashboardLayout({
           </nav>
 
           {/* User section */}
-          <div className="border-t p-4">
+          <div className="border-t border-border p-4">
             <div className="flex items-center">
               <div className="flex-1">
                 <p className="text-sm font-medium">{session.user.name}</p>
-                <p className="text-xs text-gray-500">{session.user.email}</p>
+                <p className="text-xs text-muted-foreground">{session.user.email}</p>
               </div>
             </div>
             <form

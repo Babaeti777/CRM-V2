@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
 
+  // Experimental features for better build performance
+  experimental: {
+    optimizePackageImports: ['@radix-ui/react-toast', '@radix-ui/react-alert-dialog', '@radix-ui/react-dropdown-menu', 'lucide-react'],
+  },
+
+  // Transpile external packages that need it
+  transpilePackages: ['next-themes'],
+
   // Security headers
   async headers() {
     return [

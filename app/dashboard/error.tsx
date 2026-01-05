@@ -38,7 +38,7 @@ export default function DashboardError({
           <div className="text-sm text-muted-foreground">
             <p className="font-medium mb-2">What you can try:</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Click "Try again" to reload the page</li>
+              <li>Click &ldquo;Try again&rdquo; to reload the page</li>
               <li>Go back to the dashboard home</li>
               <li>If the error persists, contact support</li>
             </ul>

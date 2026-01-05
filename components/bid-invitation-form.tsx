@@ -256,7 +256,7 @@ export function BidInvitationForm({
                 name="documentsSent"
                 type="checkbox"
                 defaultChecked={invitation?.documentsSent}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border border-input bg-background"
               />
               <Label htmlFor="documentsSent">Documents Sent</Label>
             </div>
@@ -285,7 +285,7 @@ export function BidInvitationForm({
                 name="documentsDelivered"
                 type="checkbox"
                 defaultChecked={invitation?.documentsDelivered}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border border-input bg-background"
               />
               <Label htmlFor="documentsDelivered">Documents Delivered</Label>
             </div>
@@ -314,7 +314,7 @@ export function BidInvitationForm({
                 name="documentsRead"
                 type="checkbox"
                 defaultChecked={invitation?.documentsRead}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border border-input bg-background"
               />
               <Label htmlFor="documentsRead">Documents Read</Label>
             </div>
@@ -343,7 +343,7 @@ export function BidInvitationForm({
                 name="responseReceived"
                 type="checkbox"
                 defaultChecked={invitation?.responseReceived}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border border-input bg-background"
               />
               <Label htmlFor="responseReceived">Response Received</Label>
             </div>

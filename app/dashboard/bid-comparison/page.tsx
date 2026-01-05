@@ -123,7 +123,7 @@ export default async function BidComparisonPage({
                               className={`flex items-center justify-between p-3 rounded-lg border ${
                                 index === 0
                                   ? 'bg-green-50 border-green-200'
-                                  : 'bg-white'
+                                  : 'bg-card'
                               }`}
                             >
                               <div className="flex-1">

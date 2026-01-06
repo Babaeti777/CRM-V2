@@ -263,7 +263,7 @@ export function SubcontractorForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-900 shadow-lg dark:border-gray-800">
                   {divisions.map((division) => (
                     <button
                       key={division.id}
@@ -272,9 +272,9 @@ export function SubcontractorForm({
                         toggleDivision(division.id)
                         setShowDivisionDropdown(false)
                       }}
-                      className={`w-full text-left px-3 py-2 hover:bg-gray-100 ${
+                      className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-200 ${
                         selectedDivisions.includes(division.id)
-                          ? 'bg-gray-50 text-muted-foreground'
+                          ? 'bg-gray-50 dark:bg-gray-800 text-muted-foreground'
                           : ''
                       }`}
                     >

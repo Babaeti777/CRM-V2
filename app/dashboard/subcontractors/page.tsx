@@ -53,7 +53,7 @@ export default async function SubcontractorsPage() {
         </Link>
       </div>
 
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800">
         <Table>
           <TableHeader>
             <TableRow>

@@ -110,9 +110,20 @@ export function ProjectForm({
         body: JSON.stringify(data),
       })
 
-      const result = await response.json()
+      let result
+      try {
+        const text = await response.text()
+        result = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError)
+        throw new Error('Invalid response from server')
+      }
 
-      if (!response.ok || !result.success) {
+      if (!response.ok) {
+        throw new Error(result.error?.message || `Server error: ${response.status}`)
+      }
+
+      if (!result.success) {
         throw new Error(result.error?.message || 'Failed to save project')
       }
 
@@ -124,7 +135,7 @@ export function ProjectForm({
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
-      console.error(error)
+      console.error('Project save error:', error)
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to save project. Please try again.',
@@ -149,9 +160,20 @@ export function ProjectForm({
         method: 'DELETE',
       })
 
-      const result = await response.json()
+      let result
+      try {
+        const text = await response.text()
+        result = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError)
+        throw new Error('Invalid response from server')
+      }
 
-      if (!response.ok || !result.success) {
+      if (!response.ok) {
+        throw new Error(result.error?.message || `Server error: ${response.status}`)
+      }
+
+      if (!result.success) {
         throw new Error(result.error?.message || 'Failed to delete project')
       }
 
@@ -163,7 +185,7 @@ export function ProjectForm({
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
-      console.error(error)
+      console.error('Project delete error:', error)
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to delete project. Please try again.',
@@ -346,7 +368,7 @@ export function ProjectForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-900 shadow-lg dark:border-gray-800">
                   {divisions.map((division) => (
                     <div key={division.id}>
                       <button
@@ -365,16 +387,16 @@ export function ProjectForm({
                             }
                           }
                         }}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 font-medium"
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-200 font-medium"
                       >
                         {division.code} - {division.name}
                       </button>
                       {selectedDivisionForSubdivision === division.id && (
-                        <div className="bg-gray-50">
+                        <div className="bg-gray-50 dark:bg-gray-800">
                           <button
                             type="button"
                             onClick={() => addDivision(division.id)}
-                            className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100"
+                            className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                           >
                             <em>No subdivision (general)</em>
                           </button>
@@ -387,7 +409,7 @@ export function ProjectForm({
                                 onClick={() =>
                                   addDivision(division.id, subdivision.id)
                                 }
-                                className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100"
+                                className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                               >
                                 {subdivision.code} - {subdivision.name}
                               </button>

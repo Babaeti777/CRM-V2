@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { X, Loader2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useToast } from '@/hooks/use-toast'
 
 interface Division {
   id: string
@@ -59,6 +60,7 @@ export function ProjectForm({
   project,
 }: ProjectFormProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedDivisions, setSelectedDivisions] = useState<
     Array<{ divisionId: string; subdivisionId?: string }>
@@ -108,15 +110,26 @@ export function ProjectForm({
         body: JSON.stringify(data),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to save project')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error?.message || 'Failed to save project')
       }
+
+      toast({
+        title: 'Success',
+        description: isEditing ? 'Project updated successfully' : 'Project created successfully',
+      })
 
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert('Failed to save project. Please try again.')
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to save project. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -136,15 +149,26 @@ export function ProjectForm({
         method: 'DELETE',
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to delete project')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error?.message || 'Failed to delete project')
       }
+
+      toast({
+        title: 'Success',
+        description: 'Project deleted successfully',
+      })
 
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert('Failed to delete project. Please try again.')
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete project. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }

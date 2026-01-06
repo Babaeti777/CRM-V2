@@ -10,6 +10,7 @@ import {
   FileText,
   LogOut,
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default async function DashboardLayout({
   children,
@@ -31,9 +32,9 @@ export default async function DashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white dark:bg-gray-900 dark:border-gray-800">
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center border-b px-6">
@@ -47,7 +48,7 @@ export default async function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               >
                 <item.icon className="mr-3 h-5 w-5" />
                 {item.label}
@@ -56,19 +57,19 @@ export default async function DashboardLayout({
           </nav>
 
           {/* User section */}
-          <div className="border-t p-4">
-            <div className="flex items-center">
+          <div className="border-t p-4 dark:border-gray-800">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex-1">
-                <p className="text-sm font-medium">{session.user.name}</p>
-                <p className="text-xs text-gray-500">{session.user.email}</p>
+                <p className="text-sm font-medium dark:text-gray-200">{session.user.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{session.user.email}</p>
               </div>
+              <ThemeToggle />
             </div>
             <form
               action={async () => {
                 'use server'
                 await signOut({ redirectTo: '/login' })
               }}
-              className="mt-3"
             >
               <Button variant="outline" size="sm" className="w-full" type="submit">
                 <LogOut className="mr-2 h-4 w-4" />

@@ -2,11 +2,21 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createSubcontractorSchema } from '@/lib/validations'
 import { ApiResponses } from '@/lib/api-utils'
+import { NextResponse } from 'next/server'
 
-// Force dynamic rendering for this route
+// Route segment config - must be at top level
 export const dynamic = 'force-dynamic'
-// Use Node.js runtime on Vercel
 export const runtime = 'nodejs'
+
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Allow': 'GET, POST, OPTIONS',
+    },
+  })
+}
 
 export async function POST(request: Request) {
   try {

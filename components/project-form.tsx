@@ -87,20 +87,20 @@ export function ProjectForm({
 
     const data = {
       name: formData.get('name') as string,
-      description: formData.get('description') as string,
-      location: formData.get('location') as string,
-      bidDueDate: new Date(formData.get('bidDueDate') as string),
-      rfiDate: formData.get('rfiDate')
-        ? new Date(formData.get('rfiDate') as string)
-        : null,
+      description: formData.get('description') as string || null,
+      location: formData.get('location') as string || null,
+      bidDueDate: formData.get('bidDueDate') as string,
+      rfiDate: formData.get('rfiDate') as string || null,
       prebidSiteVisit,
       prebidSiteVisitDate: prebidSiteVisit && formData.get('prebidSiteVisitDate')
-        ? new Date(formData.get('prebidSiteVisitDate') as string)
+        ? formData.get('prebidSiteVisitDate') as string
         : null,
       status: formData.get('status') as string,
       projectDivisions: selectedDivisions,
       userId,
     }
+
+    console.log('Submitting project data:', data)
 
     try {
       const url = isEditing ? `/api/projects/${project.id}` : '/api/projects'
@@ -115,11 +115,15 @@ export function ProjectForm({
       let result
       try {
         const text = await response.text()
+        console.log('Response text:', text)
         result = text ? JSON.parse(text) : {}
       } catch (parseError) {
         console.error('Failed to parse response:', parseError)
         throw new Error('Invalid response from server')
       }
+
+      console.log('Response status:', response.status)
+      console.log('Parsed result:', result)
 
       if (!response.ok) {
         const result = await response.json().catch(() => null)

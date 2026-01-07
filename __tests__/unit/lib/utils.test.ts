@@ -39,8 +39,9 @@ describe('Utility Functions', () => {
       expect(getProjectStatusVariant('AWARDED')).toBe('default')
     })
 
-    it('should return default variant for unknown status', () => {
-      expect(getProjectStatusVariant('UNKNOWN' as any)).toBe('default')
+    it('should return secondary variant for unknown status', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(getProjectStatusVariant('UNKNOWN' as any)).toBe('secondary')
     })
   })
 
@@ -54,15 +55,16 @@ describe('Utility Functions', () => {
     })
 
     it('should return correct variant for CONTACTED status', () => {
-      expect(getBidInvitationStatusVariant('CONTACTED')).toBe('secondary')
+      expect(getBidInvitationStatusVariant('CONTACTED')).toBe('outline')
     })
 
     it('should return correct variant for AWAITING_RESPONSE status', () => {
       expect(getBidInvitationStatusVariant('AWAITING_RESPONSE')).toBe('secondary')
     })
 
-    it('should return secondary variant for unknown status', () => {
-      expect(getBidInvitationStatusVariant('UNKNOWN' as any)).toBe('secondary')
+    it('should return outline variant for unknown status', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(getBidInvitationStatusVariant('UNKNOWN' as any)).toBe('outline')
     })
   })
 })

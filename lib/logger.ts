@@ -9,7 +9,7 @@ interface LogEntry {
   level: LogLevel
   message: string
   timestamp: string
-  context?: Record<string, any>
+  context?: Record<string, unknown>
   error?: Error
 }
 
@@ -41,7 +41,7 @@ class Logger {
     })
   }
 
-  private log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error) {
+  private log(level: LogLevel, message: string, context?: Record<string, unknown>, error?: Error) {
     const entry: LogEntry = {
       level,
       message,
@@ -74,7 +74,7 @@ class Logger {
     }
   }
 
-  private sendToLoggingService(entry: LogEntry) {
+  private sendToLoggingService(_entry: LogEntry) {
     // TODO: Integrate with logging service (Datadog, Sentry, etc.)
     // Example:
     // if (window.Sentry) {
@@ -88,28 +88,28 @@ class Logger {
   /**
    * Log debug information (development only)
    */
-  debug(message: string, context?: Record<string, any>) {
+  debug(message: string, context?: Record<string, unknown>) {
     this.log('debug', message, context)
   }
 
   /**
    * Log informational messages
    */
-  info(message: string, context?: Record<string, any>) {
+  info(message: string, context?: Record<string, unknown>) {
     this.log('info', message, context)
   }
 
   /**
    * Log warning messages
    */
-  warn(message: string, context?: Record<string, any>) {
+  warn(message: string, context?: Record<string, unknown>) {
     this.log('warn', message, context)
   }
 
   /**
    * Log error messages
    */
-  error(message: string, error?: Error, context?: Record<string, any>) {
+  error(message: string, error?: Error, context?: Record<string, unknown>) {
     this.log('error', message, context, error)
   }
 

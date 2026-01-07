@@ -12,7 +12,17 @@ import { format } from 'date-fns'
 export default function NewBidPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [invitations, setInvitations] = useState<any[]>([])
+  const [invitations, setInvitations] = useState<Array<{
+    id: string;
+    projectId: string;
+    subcontractorId: string;
+    divisionId: string;
+    subdivisionId: string | null;
+    project: { id: string; name: string };
+    subcontractor: { id: string; companyName: string };
+    division: { id: string; code: string; name: string };
+    subdivision: { id: string; code: string; name: string } | null;
+  }>>([])
   const [selectedInvitation, setSelectedInvitation] = useState('')
 
   useEffect(() => {

@@ -15,12 +15,12 @@ export function BidInvitationForm({
   subcontractors,
   divisions,
   subdivisions,
-  userId,
+  userId: _userId,
   invitation,
 }: BidInvitationFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedProject, setSelectedProject] = useState(invitation?.projectId || '')
+  const [_selectedProject, setSelectedProject] = useState(invitation?.projectId || '')
   const [selectedDivision, setSelectedDivision] = useState(invitation?.divisionId || '')
 
   const isEditing = !!invitation

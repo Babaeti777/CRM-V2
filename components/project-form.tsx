@@ -64,11 +64,11 @@ export function ProjectForm({
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedDivisions, setSelectedDivisions] = useState<
-    Array<{ divisionId: string; subdivisionId?: string }>
+    Array<{ divisionId: string; subdivisionId?: string | null }>
   >(
     project?.projectDivisions.map((pd) => ({
       divisionId: pd.division.id,
-      subdivisionId: pd.subdivision?.id,
+      subdivisionId: pd.subdivision?.id || null,
     })) || []
   )
   const [showDivisionDropdown, setShowDivisionDropdown] = useState(false)
@@ -199,9 +199,10 @@ export function ProjectForm({
 
   const addDivision = (divisionId: string, subdivisionId?: string) => {
     setErrorMessage(null)
+    const normalizedSubdivisionId = subdivisionId || null
     setSelectedDivisions((prev) => {
       const exists = prev.some(
-        (item) => item.divisionId === divisionId && item.subdivisionId === subdivisionId
+        (item) => item.divisionId === divisionId && item.subdivisionId === normalizedSubdivisionId
       )
 
       if (exists) {
@@ -209,7 +210,7 @@ export function ProjectForm({
         return prev
       }
 
-      return [...prev, { divisionId, subdivisionId }]
+      return [...prev, { divisionId, subdivisionId: normalizedSubdivisionId }]
     })
     setShowDivisionDropdown(false)
     setSelectedDivisionForSubdivision(null)

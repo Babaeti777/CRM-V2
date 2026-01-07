@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createProjectSchema } from '@/lib/validations'
@@ -8,14 +7,31 @@ import { ApiResponses } from '@/lib/api-utils'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// Handle OPTIONS for CORS preflight
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Allow': 'GET, POST, OPTIONS',
-    },
-  })
+export async function GET() {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return ApiResponses.unauthorized()
+    }
+
+    const projects = await prisma.project.findMany({
+      where: { userId: session.user.id },
+      include: {
+        projectDivisions: {
+          include: {
+            division: true,
+            subdivision: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return ApiResponses.success(projects)
+  } catch (error) {
+    console.error('Error fetching projects:', error)
+    return ApiResponses.serverError('Failed to fetch projects')
+  }
 }
 
 export async function POST(request: Request) {

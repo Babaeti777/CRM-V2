@@ -64,11 +64,11 @@ export function ProjectForm({
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedDivisions, setSelectedDivisions] = useState<
-    Array<{ divisionId: string; subdivisionId?: string }>
+    Array<{ divisionId: string; subdivisionId?: string | null }>
   >(
     project?.projectDivisions.map((pd) => ({
       divisionId: pd.division.id,
-      subdivisionId: pd.subdivision?.id,
+      subdivisionId: pd.subdivision?.id || null,
     })) || []
   )
   const [showDivisionDropdown, setShowDivisionDropdown] = useState(false)

@@ -62,6 +62,7 @@ export function ProjectForm({
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedDivisions, setSelectedDivisions] = useState<
     Array<{ divisionId: string; subdivisionId?: string }>
   >(
@@ -78,6 +79,7 @@ export function ProjectForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setErrorMessage(null)
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
@@ -120,11 +122,9 @@ export function ProjectForm({
       }
 
       if (!response.ok) {
-        throw new Error(result.error?.message || `Server error: ${response.status}`)
-      }
-
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to save project')
+        const result = await response.json().catch(() => null)
+        const message = result?.error?.message || 'Failed to save project'
+        throw new Error(message)
       }
 
       toast({
@@ -135,12 +135,9 @@ export function ProjectForm({
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
-      console.error('Project save error:', error)
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to save project. Please try again.',
-        variant: 'destructive',
-      })
+      console.error(error)
+      const message = error instanceof Error ? error.message : 'Failed to save project'
+      setErrorMessage(message)
     } finally {
       setIsLoading(false)
     }
@@ -197,7 +194,19 @@ export function ProjectForm({
   }
 
   const addDivision = (divisionId: string, subdivisionId?: string) => {
-    setSelectedDivisions((prev) => [...prev, { divisionId, subdivisionId }])
+    setErrorMessage(null)
+    setSelectedDivisions((prev) => {
+      const exists = prev.some(
+        (item) => item.divisionId === divisionId && item.subdivisionId === subdivisionId
+      )
+
+      if (exists) {
+        setErrorMessage('This division is already selected.')
+        return prev
+      }
+
+      return [...prev, { divisionId, subdivisionId }]
+    })
     setShowDivisionDropdown(false)
     setSelectedDivisionForSubdivision(null)
   }
@@ -297,7 +306,7 @@ export function ProjectForm({
                 name="prebidSiteVisit"
                 type="checkbox"
                 defaultChecked={project?.prebidSiteVisit}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border border-input bg-background"
               />
               <Label htmlFor="prebidSiteVisit">Prebid Site Visit Required</Label>
             </div>
@@ -325,7 +334,7 @@ export function ProjectForm({
               id="status"
               name="status"
               defaultValue={project?.status || 'DRAFT'}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
               required
             >
               <option value="DRAFT">Draft</option>
@@ -368,7 +377,7 @@ export function ProjectForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-900 shadow-lg dark:border-gray-800">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
                   {divisions.map((division) => (
                     <div key={division.id}>
                       <button
@@ -387,16 +396,16 @@ export function ProjectForm({
                             }
                           }
                         }}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-200 font-medium"
+                        className="w-full text-left px-3 py-2 hover:bg-muted font-medium"
                       >
                         {division.code} - {division.name}
                       </button>
                       {selectedDivisionForSubdivision === division.id && (
-                        <div className="bg-gray-50 dark:bg-gray-800">
+                        <div className="bg-muted/50">
                           <button
                             type="button"
                             onClick={() => addDivision(division.id)}
-                            className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                            className="w-full text-left px-6 py-2 text-sm hover:bg-muted"
                           >
                             <em>No subdivision (general)</em>
                           </button>
@@ -409,7 +418,7 @@ export function ProjectForm({
                                 onClick={() =>
                                   addDivision(division.id, subdivision.id)
                                 }
-                                className="w-full text-left px-6 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                                className="w-full text-left px-6 py-2 text-sm hover:bg-muted"
                               >
                                 {subdivision.code} - {subdivision.name}
                               </button>
@@ -455,6 +464,9 @@ export function ProjectForm({
             </Button>
           </div>
         </CardFooter>
+        {errorMessage && (
+          <div className="px-6 pb-6 text-sm text-destructive">{errorMessage}</div>
+        )}
       </Card>
     </form>
   )

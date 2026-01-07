@@ -109,7 +109,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+            <Card className="transition-colors hover:bg-muted/60 cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
                 {upcomingDeadlines.map((project: ProjectWithDivisions) => (
                   <div
                     key={project.id}
-                    className="flex items-center justify-between border-b pb-2 last:border-0"
+                    className="flex items-center justify-between border-b border-border pb-2 last:border-0"
                   >
                     <div>
                       <p className="font-medium">{project.name}</p>
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
                 {followUpsNeeded.map((invitation: InvitationWithRelations) => (
                   <div
                     key={invitation.id}
-                    className="flex items-center justify-between border-b pb-2 last:border-0"
+                    className="flex items-center justify-between border-b border-border pb-2 last:border-0"
                   >
                     <div>
                       <p className="font-medium">{invitation.subcontractor.companyName}</p>

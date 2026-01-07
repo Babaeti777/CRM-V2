@@ -33,15 +33,10 @@ interface Subcontractor {
 
 interface SubcontractorFormProps {
   divisions: Division[]
-  userId: string
   subcontractor?: Subcontractor
 }
 
-export function SubcontractorForm({
-  divisions,
-  userId,
-  subcontractor,
-}: SubcontractorFormProps) {
+export function SubcontractorForm({ divisions, subcontractor }: SubcontractorFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedDivisions, setSelectedDivisions] = useState<string[]>(
@@ -67,7 +62,6 @@ export function SubcontractorForm({
       zipCode: formData.get('zipCode') as string,
       notes: formData.get('notes') as string,
       divisionIds: selectedDivisions,
-      userId,
     }
 
     try {
@@ -263,7 +257,7 @@ export function SubcontractorForm({
                 Add Division
               </Button>
               {showDivisionDropdown && (
-                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-900 shadow-lg dark:border-gray-800">
+                <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-lg">
                   {divisions.map((division) => (
                     <button
                       key={division.id}
@@ -272,9 +266,9 @@ export function SubcontractorForm({
                         toggleDivision(division.id)
                         setShowDivisionDropdown(false)
                       }}
-                      className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-200 ${
+                      className={`w-full text-left px-3 py-2 hover:bg-muted ${
                         selectedDivisions.includes(division.id)
-                          ? 'bg-gray-50 dark:bg-gray-800 text-muted-foreground'
+                          ? 'bg-muted/60 text-muted-foreground'
                           : ''
                       }`}
                     >

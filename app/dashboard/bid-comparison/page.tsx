@@ -122,8 +122,8 @@ export default async function BidComparisonPage({
                               key={bid.id}
                               className={`flex items-center justify-between p-3 rounded-lg border ${
                                 index === 0
-                                  ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
-                                  : 'bg-white dark:bg-gray-900 dark:border-gray-800'
+                                  ? 'bg-green-50 border-green-200'
+                                  : 'bg-card'
                               }`}
                             >
                               <div className="flex-1">

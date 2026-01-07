@@ -46,11 +46,7 @@ export default async function EditSubcontractorPage({
         </p>
       </div>
 
-      <SubcontractorForm
-        divisions={divisions}
-        userId={userId}
-        subcontractor={subcontractor}
-      />
+      <SubcontractorForm divisions={divisions} subcontractor={subcontractor} />
     </div>
   )
 }

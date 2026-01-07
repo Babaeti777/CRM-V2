@@ -22,11 +22,7 @@ export async function POST(request: Request) {
       return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
     }
 
-    const data = result.data
-
-    if (data.userId !== session.user.id) {
-      return ApiResponses.forbidden()
-    }
+    const data = { ...result.data, userId: session.user.id }
 
     const project = await prisma.project.create({
       data: {

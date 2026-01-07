@@ -18,7 +18,11 @@ export default function NewBidPage() {
   useEffect(() => {
     fetch('/api/bid-invitations-for-bids')
       .then((res) => res.json())
-      .then((data) => setInvitations(data))
+      .then((result) => {
+        if (result.success && result.data) {
+          setInvitations(result.data)
+        }
+      })
       .catch((err) => console.error(err))
   }, [])
 
@@ -57,15 +61,17 @@ export default function NewBidPage() {
         body: JSON.stringify(data),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to save bid')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error?.message || 'Failed to save bid')
       }
 
       router.push('/dashboard/bid-comparison')
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert('Failed to save bid. Please try again.')
+      alert(error instanceof Error ? error.message : 'Failed to save bid. Please try again.')
     } finally {
       setIsLoading(false)
     }

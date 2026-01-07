@@ -199,9 +199,10 @@ export function ProjectForm({
 
   const addDivision = (divisionId: string, subdivisionId?: string) => {
     setErrorMessage(null)
+    const normalizedSubdivisionId = subdivisionId || null
     setSelectedDivisions((prev) => {
       const exists = prev.some(
-        (item) => item.divisionId === divisionId && item.subdivisionId === subdivisionId
+        (item) => item.divisionId === divisionId && item.subdivisionId === normalizedSubdivisionId
       )
 
       if (exists) {
@@ -209,7 +210,7 @@ export function ProjectForm({
         return prev
       }
 
-      return [...prev, { divisionId, subdivisionId }]
+      return [...prev, { divisionId, subdivisionId: normalizedSubdivisionId }]
     })
     setShowDivisionDropdown(false)
     setSelectedDivisionForSubdivision(null)

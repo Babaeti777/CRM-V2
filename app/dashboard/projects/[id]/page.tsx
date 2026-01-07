@@ -91,6 +91,7 @@ export default async function ProjectDetailPage({
             divisions={divisions}
             subdivisions={subdivisions}
             userId={userId}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             project={project as any}
           />
         </TabsContent>

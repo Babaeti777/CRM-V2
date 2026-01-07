@@ -3,6 +3,9 @@ import { auth } from '@/auth'
 import { createBidInvitationSchema } from '@/lib/validations'
 import { ApiResponses } from '@/lib/api-utils'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const session = await auth()

@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { X, Loader2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useToast } from '@/hooks/use-toast'
 
 interface Division {
   id: string
@@ -59,6 +60,7 @@ export function ProjectForm({
   project,
 }: ProjectFormProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedDivisions, setSelectedDivisions] = useState<
@@ -110,11 +112,25 @@ export function ProjectForm({
         body: JSON.stringify(data),
       })
 
+      let result
+      try {
+        const text = await response.text()
+        result = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError)
+        throw new Error('Invalid response from server')
+      }
+
       if (!response.ok) {
         const result = await response.json().catch(() => null)
         const message = result?.error?.message || 'Failed to save project'
         throw new Error(message)
       }
+
+      toast({
+        title: 'Success',
+        description: isEditing ? 'Project updated successfully' : 'Project created successfully',
+      })
 
       router.push('/dashboard/projects')
       router.refresh()
@@ -141,15 +157,37 @@ export function ProjectForm({
         method: 'DELETE',
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to delete project')
+      let result
+      try {
+        const text = await response.text()
+        result = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError)
+        throw new Error('Invalid response from server')
       }
+
+      if (!response.ok) {
+        throw new Error(result.error?.message || `Server error: ${response.status}`)
+      }
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Failed to delete project')
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Project deleted successfully',
+      })
 
       router.push('/dashboard/projects')
       router.refresh()
     } catch (error) {
-      console.error(error)
-      alert('Failed to delete project. Please try again.')
+      console.error('Project delete error:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete project. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -213,7 +251,7 @@ export function ProjectForm({
               id="description"
               name="description"
               defaultValue={project?.description || ''}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background dark:bg-gray-900 px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               placeholder="Project description..."
             />
           </div>

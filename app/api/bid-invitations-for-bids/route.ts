@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { ApiResponses } from '@/lib/api-utils'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // Status values that indicate an invitation is ready for bid submission
 const READY_FOR_BID_STATUSES = ['RESPONDED', 'CONTACTED', 'AWAITING_RESPONSE'] as const
 

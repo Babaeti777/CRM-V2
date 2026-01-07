@@ -18,7 +18,11 @@ export default function NewBidPage() {
   useEffect(() => {
     fetch('/api/bid-invitations-for-bids')
       .then((res) => res.json())
-      .then((data) => setInvitations(data))
+      .then((result) => {
+        if (result.success && result.data) {
+          setInvitations(result.data)
+        }
+      })
       .catch((err) => console.error(err))
   }, [])
 
@@ -57,15 +61,17 @@ export default function NewBidPage() {
         body: JSON.stringify(data),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to save bid')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error?.message || 'Failed to save bid')
       }
 
       router.push('/dashboard/bid-comparison')
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert('Failed to save bid. Please try again.')
+      alert(error instanceof Error ? error.message : 'Failed to save bid. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -96,7 +102,7 @@ export default function NewBidPage() {
                 id="invitation"
                 value={selectedInvitation}
                 onChange={(e) => setSelectedInvitation(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-gray-900 px-3 py-1 text-sm text-foreground"
                 required
               >
                 <option value="">Select invitation...</option>
@@ -170,7 +176,7 @@ export default function NewBidPage() {
                 id="status"
                 name="status"
                 defaultValue="SUBMITTED"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-gray-900 px-3 py-1 text-sm text-foreground"
                 required
               >
                 <option value="SUBMITTED">Submitted</option>
@@ -185,7 +191,7 @@ export default function NewBidPage() {
               <textarea
                 id="notes"
                 name="notes"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background dark:bg-gray-900 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                 placeholder="Additional notes about this bid..."
               />
             </div>

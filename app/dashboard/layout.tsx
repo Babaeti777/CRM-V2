@@ -10,6 +10,7 @@ import {
   FileText,
   LogOut,
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default async function DashboardLayout({
   children,
@@ -62,13 +63,13 @@ export default async function DashboardLayout({
                 <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-muted-foreground">{session.user.email}</p>
               </div>
+              <ThemeToggle />
             </div>
             <form
               action={async () => {
                 'use server'
                 await signOut({ redirectTo: '/login' })
               }}
-              className="mt-3"
             >
               <Button variant="outline" size="sm" className="w-full" type="submit">
                 <LogOut className="mr-2 h-4 w-4" />

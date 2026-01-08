@@ -1,47 +1,11 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createSubcontractorSchema } from '@/lib/validations'
 import { ApiResponses } from '@/lib/api-utils'
 
-// Force dynamic rendering
+// Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
-
-// Handle OPTIONS for CORS preflight
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Allow': 'GET, POST, OPTIONS',
-    },
-  })
-}
-
-export async function GET() {
-  try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return ApiResponses.unauthorized()
-    }
-
-    const subcontractors = await prisma.subcontractor.findMany({
-      where: { userId: session.user.id },
-      include: {
-        subcontractorDivisions: {
-          include: {
-            division: true,
-          },
-        },
-      },
-      orderBy: { companyName: 'asc' },
-    })
-
-    return ApiResponses.success(subcontractors)
-  } catch (error) {
-    console.error('Error fetching subcontractors:', error)
-    return ApiResponses.serverError('Failed to fetch subcontractors')
-  }
-}
+export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {

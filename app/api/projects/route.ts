@@ -4,9 +4,8 @@ import { auth } from '@/auth'
 import { createProjectSchema } from '@/lib/validations'
 import { ApiResponses } from '@/lib/api-utils'
 
-// Route segment config - must be at top level
+// Force dynamic rendering
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 
 // Handle OPTIONS for CORS preflight
 export async function OPTIONS() {

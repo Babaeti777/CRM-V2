@@ -1,25 +1,60 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createSubcontractorSchema } from '@/lib/validations'
-import { ApiResponses } from '@/lib/api-utils'
 
-// Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return ApiResponses.unauthorized()
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized' } },
+        { status: 401 }
+      )
+    }
+
+    const subcontractors = await prisma.subcontractor.findMany({
+      where: { userId: session.user.id },
+      include: {
+        subcontractorDivisions: {
+          include: {
+            division: true,
+          },
+        },
+      },
+      orderBy: { companyName: 'asc' },
+    })
+
+    return NextResponse.json({ success: true, data: subcontractors })
+  } catch (error) {
+    console.error('Error fetching subcontractors:', error)
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to fetch subcontractors' } },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized' } },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
 
-    // Validate request body
     const result = createSubcontractorSchema.safeParse(body)
     if (!result.success) {
-      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
+      return NextResponse.json(
+        { success: false, error: { message: result.error.errors[0]?.message || 'Invalid request' } },
+        { status: 400 }
+      )
     }
 
     const data = result.data
@@ -44,9 +79,12 @@ export async function POST(request: Request) {
       },
     })
 
-    return ApiResponses.created(subcontractor)
+    return NextResponse.json({ success: true, data: subcontractor }, { status: 201 })
   } catch (error) {
     console.error('Error creating subcontractor:', error)
-    return ApiResponses.serverError('Failed to create subcontractor')
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to create subcontractor' } },
+      { status: 500 }
+    )
   }
 }

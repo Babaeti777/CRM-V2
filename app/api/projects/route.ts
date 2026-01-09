@@ -1,25 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createProjectSchema } from '@/lib/validations'
-import { ApiResponses } from '@/lib/api-utils'
 
-// Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return ApiResponses.unauthorized()
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized' } },
+        { status: 401 }
+      )
+    }
+
+    const projects = await prisma.project.findMany({
+      where: { userId: session.user.id },
+      include: {
+        projectDivisions: {
+          include: {
+            division: true,
+            subdivision: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return NextResponse.json({ success: true, data: projects })
+  } catch (error) {
+    console.error('Error fetching projects:', error)
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to fetch projects' } },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized' } },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
 
-    // Validate request body
     const result = createProjectSchema.safeParse(body)
     if (!result.success) {
-      return ApiResponses.badRequest(result.error.errors[0]?.message || 'Invalid request')
+      return NextResponse.json(
+        { success: false, error: { message: result.error.errors[0]?.message || 'Invalid request' } },
+        { status: 400 }
+      )
     }
 
     const data = { ...result.data, userId: session.user.id }
@@ -46,9 +82,12 @@ export async function POST(request: Request) {
       },
     })
 
-    return ApiResponses.created(project)
+    return NextResponse.json({ success: true, data: project }, { status: 201 })
   } catch (error) {
     console.error('Error creating project:', error)
-    return ApiResponses.serverError('Failed to create project')
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to create project' } },
+      { status: 500 }
+    )
   }
 }

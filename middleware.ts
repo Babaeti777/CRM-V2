@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 /**
  * Public routes that don't require authentication
  */
-const PUBLIC_ROUTES = ['/login']
+const _PUBLIC_ROUTES = ['/login']
 
 /**
  * Routes that should redirect to dashboard if authenticated

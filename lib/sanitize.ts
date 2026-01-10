@@ -1,32 +1,78 @@
-import DOMPurify from 'isomorphic-dompurify'
-
 /**
  * Sanitize HTML content to prevent XSS attacks
  * Removes all HTML tags and potentially dangerous content
+ * Uses a serverless-compatible approach (no jsdom dependency)
  */
 export function sanitizeHTML(dirty: string): string {
   if (!dirty || typeof dirty !== 'string') return ''
 
-  // Strip all HTML tags for plain text fields
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true,
-  }).trim()
+  return dirty
+    // Remove script tags and their content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove style tags and their content
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    // Remove all HTML tags but keep content
+    .replace(/<[^>]*>/g, '')
+    // Decode common HTML entities
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    // Remove null bytes
+    .replace(/\0/g, '')
+    .trim()
 }
 
 /**
  * Sanitize rich text content (preserves safe HTML tags)
- * Allows basic formatting while removing dangerous elements
+ * Uses a serverless-compatible allowlist approach
  */
 export function sanitizeRichText(dirty: string): string {
   if (!dirty || typeof dirty !== 'string') return ''
 
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-  }).trim()
+  const allowedTags = ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li']
+  const allowedAttrs = ['href', 'target', 'rel']
+
+  // Remove script and style tags completely
+  let clean = dirty
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+
+  // Remove event handlers (onclick, onerror, etc.)
+  clean = clean.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+  clean = clean.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
+
+  // Remove javascript: and data: URLs
+  clean = clean.replace(/href\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, '')
+  clean = clean.replace(/href\s*=\s*["']?\s*data:[^"'>\s]*/gi, '')
+
+  // Remove tags not in allowlist (but keep their content)
+  const tagPattern = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
+  clean = clean.replace(tagPattern, (match, tagName) => {
+    const lowerTag = tagName.toLowerCase()
+    if (allowedTags.includes(lowerTag)) {
+      // For allowed tags, strip attributes not in allowlist
+      if (match.startsWith('</')) {
+        return `</${lowerTag}>`
+      }
+      // Extract allowed attributes
+      const attrMatches: string[] = []
+      for (const attr of allowedAttrs) {
+        const attrPattern = new RegExp(`${attr}\\s*=\\s*["']([^"']*)["']`, 'i')
+        const attrMatch = match.match(attrPattern)
+        if (attrMatch) {
+          attrMatches.push(`${attr}="${attrMatch[1]}"`)
+        }
+      }
+      const attrs = attrMatches.length > 0 ? ' ' + attrMatches.join(' ') : ''
+      return `<${lowerTag}${attrs}>`
+    }
+    return '' // Remove non-allowed tags
+  })
+
+  return clean.replace(/\0/g, '').trim()
 }
 
 /**

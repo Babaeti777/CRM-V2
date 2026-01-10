@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { createProjectSchema } from '@/lib/validations'
-import { ApiResponses } from '@/lib/api-utils'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'

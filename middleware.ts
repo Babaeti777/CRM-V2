@@ -1,16 +1,11 @@
-import { auth } from '@/auth'
-
-/**
- * Public routes that don't require authentication
- */
-const _PUBLIC_ROUTES = ['/login']
+import { authEdge } from '@/auth.edge'
 
 /**
  * Routes that should redirect to dashboard if authenticated
  */
 const AUTH_ROUTES = ['/login']
 
-export default auth((req) => {
+export default authEdge((req) => {
   const isLoggedIn = !!req.auth?.user
   const pathname = req.nextUrl.pathname
 

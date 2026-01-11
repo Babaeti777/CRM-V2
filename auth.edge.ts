@@ -1,11 +1,9 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/lib/prisma'
 
-// Auth with Prisma adapter for user persistence
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+// Edge-compatible auth config (no Prisma adapter)
+// Used only for middleware authentication checks
+export const { auth: authEdge } = NextAuth({
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -38,5 +36,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 })
-
-export const { GET, POST } = handlers
